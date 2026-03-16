@@ -1,4 +1,4 @@
-const Product = require("../model/projectModel");
+const Product = require("../model/productModel");
 const asyncHandler = require("../middlewares/asyncHandler")
 // create, update , delete , read 
 
@@ -11,7 +11,7 @@ const createProduct = asyncHandler(async (req,res)=>{
 });
 
 const updateProduct = asyncHandler(async (req,res)=>{
-    const product = Product.findByIdAndUpdate(req.params.id,req.body,{new:true,runValidators:true});
+    const product = await Product.findByIdAndUpdate(req.params.id,req.body,{returnDocument:true,runValidators:true});
     if(!product){
         return res.status(404).json({
             message:"cant find the product"
@@ -22,9 +22,15 @@ const updateProduct = asyncHandler(async (req,res)=>{
         data:product
     })
 });
-
+const getSingleProduct = asyncHandler(async (req, res) => {
+    const product = await Product.findById(req.params.id);
+    if (!product) {
+        return res.status(404).json({ message: "Product not found" });
+    }
+    res.status(200).json({ message: "Returning Product", data: product });
+});
 const deleteProduct = asyncHandler(async(req,res)=>{
-    const product = Product.findByIdAndDelete(req.params.id);
+    const product = await Product.findByIdAndDelete(req.params.id);
     res.status(200).json({
         message:"product deleted successfully",
         data:product
@@ -33,11 +39,11 @@ const deleteProduct = asyncHandler(async(req,res)=>{
 });
 
 const getProduct = asyncHandler(async (req,res)=>{
-    const product = Product.find();
+    const product = await Product.find({});
     res.status(200).json({
         message:"Returning Product",
         data:product
     })
 });
 
-module.exports = {createProduct,updateProduct,deleteProduct,getProduct}
+module.exports = {createProduct,getSingleProduct,updateProduct,deleteProduct,getProduct}
