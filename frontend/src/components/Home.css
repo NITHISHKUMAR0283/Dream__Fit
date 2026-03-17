@@ -1,0 +1,103 @@
+
+#Nav-Bar{
+    display: flex;
+    flex-direction: row;
+    justify-content:space-between;
+    max-width: 100%;
+    padding: 5px 0;
+    
+}
+#left{
+    display: flex;
+    flex-direction: row;
+    align-items:center;
+    justify-content: flex-start;
+    
+    flex: 0.7 ;
+    
+    
+    
+}
+#left>*{
+    padding: 0 1rem;
+    
+    justify-content: flex-start;
+}
+#left>.my-burger-style{
+    
+    width: 40px;
+    
+}
+.hide-on-small{
+    margin: 0px;
+}
+
+#CompanyName{
+    list-style-type:none;
+    font-size: 1.2rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.my-burger-style{
+    height: 1.2rem ;
+
+   
+}
+.search_icon{
+    height:0.8rem;
+    width: 0.8rem;
+    min-height: 30px;
+    min-width: 20px;
+    padding: 0 8px;
+}
+#right{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    flex:1;
+    min-width: 0;
+    
+}
+#right>#Search{
+    flex-grow:2;
+    min-width: 25px;
+    
+}
+
+
+.Cart{
+   
+    
+    height: 1.5rem;
+    width: 4rem;
+    margin: 0 10px;
+    min-width: 20px;
+}
+
+#Search{
+    display: flex;
+    border-radius: 50px;
+    overflow: hidden;
+    border: 2px solid black;
+    height: 30px;
+    align-items: center;
+    
+    max-width: 600px;
+}
+#Search>#Input{
+    width: 100%;
+    border: none;
+    outline: none;
+    font-size: medium;
+    height: 100%;
+}
+.search_icon{
+    height: 1.2rem;
+}
+@media (max-width:600px){
+    .hide-on-small{
+        display: none;
+    }
+    
+}
