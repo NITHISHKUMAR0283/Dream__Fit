@@ -4,13 +4,13 @@
   grid-template-columns: repeat(auto-fit,minmax(149px,1fr));
 
   overflow: hidden;
-  gap: 7px;
+  gap: 3px;
   padding: 9px;
   background-color:rgb(255, 255, 255)}
 
 .card img{
   width: 100%;
-  aspect-ratio: 1.2/1.2;
+  aspect-ratio: 1/1.4;
   object-fit:cover;
 }
 .card{

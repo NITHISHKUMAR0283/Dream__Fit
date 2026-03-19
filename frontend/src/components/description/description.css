@@ -41,10 +41,11 @@
 #About{
   display: -webkit-inline-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;  
+  -webkit-line-clamp: 3;  
   overflow: hidden;
-  height: 40px;
+  height: fit-content;
   margin: 0px;
+  font-family:  "Segoe UI";
 }
 #rating{
   height: fit-content;
