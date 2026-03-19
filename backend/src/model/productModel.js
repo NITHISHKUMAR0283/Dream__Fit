@@ -1,31 +1,47 @@
 const mongoose = require("mongoose");
 
+const variantSchema = mongoose.Schema({
+    
+            color: {
+                type:String,
+                required:true
+            },
+            size: {
+                type:String,
+                required:true
+            },
+            sku: {
+                type: String,
+                required: true,
+                unique: true
+            },
+            price:{
+                type:Number,
+                required:true
+            },
+            stock:{
+                type:Number,
+                default:0
+            },
+            images:[{
+                url:{
+                    type:String,
+                    required:true
+                
+                }
+        }]
+        
+        }
+)
 const productSchema = mongoose.Schema({
-    //price, description , size(and its unit ) , color , about this item , picture
-    description:{
+   About:{
         type:String,
         required:true
     },
-    sizes:{
-        type:String,
-        required:true        
-    },
-    colors:{
-        type:String,
-    },
-    image:{
-        type:String,
-        required:true
-    },
-    About:{
-        type:String,
-        required:true
-    },
-    Price:{
-        type: Number,
-        required:true
-    }
-
+    variant:[variantSchema]
+    
+    
+    
 });
 module.exports = mongoose.model("Product",productSchema);
 
