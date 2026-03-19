@@ -8,7 +8,7 @@ app.use(express.json())
 const port = process.env.PORT || 5000;
 
 connectdb();
-app.use("/",projectRoute);
+app.use("/api/products",projectRoute);
 app.use((err,req, res,next)=>{
     const status=err.status||500;
     const message= err.message || "Internal Server Error";

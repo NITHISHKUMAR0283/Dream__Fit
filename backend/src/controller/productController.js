@@ -1,6 +1,6 @@
 const Product = require("../model/productModel");
 const asyncHandler = require("../middlewares/asyncHandler")
-// create, update , delete , read 
+
 
 const createProduct = asyncHandler(async (req,res)=>{
     const product = await Product.create(req.body);
@@ -11,7 +11,7 @@ const createProduct = asyncHandler(async (req,res)=>{
 });
 
 const updateProduct = asyncHandler(async (req,res)=>{
-    const product = await Product.findByIdAndUpdate(req.params.id,req.body,{returnDocument:true,runValidators:true});
+    const product = await Product.findByIdAndUpdate(req.params.id,req.body,{new:true,runValidators:true});
     if(!product){
         return res.status(404).json({
             message:"cant find the product"
@@ -61,4 +61,106 @@ const getProduct = asyncHandler(async (req, res) => {
     });
 });
 
-module.exports = {createProduct,getSingleProduct,updateProduct,deleteProduct,getProduct}
+const addVariant = asyncHandler(async (req, res) => {
+  const product = await Product.findById(req.params.id);
+
+  if (!product) {
+    return res.status(404).json({ message: "Product not found" });
+  }
+
+  product.variants.push(req.body);
+
+  await product.save();
+
+  res.status(200).json({
+    message: "Variant added",
+    data: product
+  });
+});
+const updateVariant = asyncHandler(async (req, res) => {
+  const { productId, variantId } = req.params;
+
+  const product = await Product.findById(productId);
+
+  if (!product) {
+    return res.status(404).json({ message: "Product not found" });
+  }
+
+  const variant = product.variants.id(variantId);
+
+  if (!variant) {
+    return res.status(404).json({ message: "Variant not found" });
+  }
+
+  Object.assign(variant, req.body);
+
+  await product.save();
+
+  res.status(200).json({
+    message: "Variant updated",
+    data: variant
+  });
+});
+const deleteVariant = asyncHandler(async (req, res) => {
+  const { productId, variantId } = req.params;
+
+  const product = await Product.findById(productId);
+
+  if (!product) {
+    return res.status(404).json({
+      message: "Product not found"
+    });
+  }
+
+  const variant = product.variants.id(variantId);
+
+  if (!variant) {
+    return res.status(404).json({
+      message: "Variant not found"
+    });
+  }
+
+  variant.deleteOne();
+
+  await product.save();
+
+  res.status(200).json({
+    message: "Variant deleted successfully",
+    data: product
+  });
+});
+
+const getVariant = asyncHandler(async (req, res) => {
+  const { color, size } = req.query;
+
+  const product = await Product.findById(req.params.id);
+
+  if (!product) {
+    return res.status(404).json({ message: "Product not found" });
+  }
+
+  const variant = product.variants.find(
+    v => v.color === color && v.size === size
+  );
+
+  if (!variant) {
+    return res.status(404).json({ message: "Variant not found" });
+  }
+
+  res.status(200).json({
+    message: "Variant fetched",
+    data: variant
+  });
+});
+
+module.exports = {
+  createProduct,
+  getSingleProduct,
+  updateProduct,
+  deleteProduct,
+  getProduct,
+  addVariant,
+  updateVariant,
+  deleteVariant,
+  getVariant
+};
