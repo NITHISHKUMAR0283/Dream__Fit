@@ -1,14 +1,38 @@
 import React from 'react';
 import {Route,Routes} from 'react-router-dom' ;
 import Home from './components/Home/Home'
-
+import MenuIcon from './assets/burger-menu.svg?react';
+import Search from './assets/search-button.svg?react';
+import Cart from './assets/shopping-cart.svg?react';
+import Product from './components/individual/individual'
+import './App.css'
 function App(){
     return (
-        
+        <div>
+            <nav id="Nav-Bar">
+                <div id="left">
+                    <MenuIcon className= "my-burger-style"/>
+                    <div id = "CompanyName">RIYANSHBABA</div>    
+                    <p className='hide-on-small'>NewArrivals</p>
+                </div>
+                <div id="right">
+                <div id="Search">
+                    
+                    <Search className="search_icon"/>
+                    <input id="Input" type="text" />
+                    
+                </div>
+                <Cart className ="Cart"/>
+                </div>    
+
+            </nav>
             <Routes>
-                <Route path="/" element={<Home/>}>
-                </Route>
+                <Route path="/" element={<Home/>}></Route>
+                <Route path="/product/:id" element={<Product/>}></Route> 
             </Routes>
+            </div>
+        
+            
         
         
     )
