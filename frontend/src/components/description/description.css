@@ -38,14 +38,22 @@
 .rating{
   gap: 6px;
 }
+#About{
+  display: -webkit-inline-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;  
+  overflow: hidden;
+  height: 40px;
+  margin: 0px;
+}
 #rating{
   height: fit-content;
-  font-size:1rem;
+  font-size:0.9rem;
 }
 #price{
   margin-top: 5px;
   font-weight: 550;
-  font-size: larger;
+  font-size: 1.1rem;
   height: fit-content;
   margin-bottom: 4px;
 }

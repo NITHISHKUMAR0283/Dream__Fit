@@ -9,8 +9,8 @@ function ProductCard({product}){
     return (
         <div className="card">
             <img src={image} alt={title}></img>
-            <p>{About}</p>
-            <Description product={product}/>
+           
+            <Description id="product" product={product}/>
            
         </div>
     )

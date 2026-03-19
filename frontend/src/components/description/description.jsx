@@ -4,6 +4,7 @@ function description({product}){
     
     return(
         <div>
+        <p id ="About">{product.About}</p>
         <div className="rating">
       <div className="stars-outer">
         <div

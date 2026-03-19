@@ -20,6 +20,10 @@ const productSchema = mongoose.Schema({
     About:{
         type:String,
         required:true
+    },
+    Price:{
+        type: Number,
+        required:true
     }
 
 });

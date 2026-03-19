@@ -37,13 +37,28 @@ const deleteProduct = asyncHandler(async(req,res)=>{
     }
     )
 });
+const getProduct = asyncHandler(async (req, res) => {
+    const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+    const limit = Math.max(parseInt(req.query.limit, 10) || 10, 1);
+    const skip = (page - 1) * limit;
 
-const getProduct = asyncHandler(async (req,res)=>{
-    const product = await Product.find({});
+    const [products, totalProducts] = await Promise.all([
+        Product.find({}).skip(skip).limit(limit),
+        Product.countDocuments({})
+    ]);
+
+    const totalPages = Math.ceil(totalProducts / limit);
+
     res.status(200).json({
-        message:"Returning Product",
-        data:product
-    })
+        message: "Returning Products",
+        data: products,
+        pagination: {
+            currentPage: page,
+            limit,
+            totalProducts,
+            totalPages
+        }
+    });
 });
 
 module.exports = {createProduct,getSingleProduct,updateProduct,deleteProduct,getProduct}

@@ -5,7 +5,7 @@
 
   overflow: hidden;
   gap: 7px;
-  padding: 7px;
+  padding: 9px;
   background-color:rgb(255, 255, 255)}
 
 .card img{
@@ -22,10 +22,9 @@
   margin:0px;
   
 }
-.card :nth-child(2){
-  display: -webkit-inline-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;  
-  overflow: hidden;
-  height: 40px;
+.card :nth-child(2)
+
+#product{
+  margin: 5px;
+  background-color: red;
 }
