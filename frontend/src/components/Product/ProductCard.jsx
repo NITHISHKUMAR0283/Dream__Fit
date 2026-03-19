@@ -1,4 +1,5 @@
 import React from 'react';
+import Description from '../description/description';
 function ProductCard({product}){
     const image = product?.image || "https://via.placeholder.com/250x250?text=Product";
     const title = product?.description || product?.name || "Product";
@@ -9,18 +10,8 @@ function ProductCard({product}){
         <div className="card">
             <img src={image} alt={title}></img>
             <p>{About}</p>
-           <div className="rating">
-      <div className="stars-outer">
-        <div
-          className="stars-inner"
-          style={{ width: `${(product.rating / 5) * 100}%` }}
-        ></div>
-            
-        
-      </div>
-      <div id="rating"> {product.rating}/5</div>
-    </div >
-        {price !== undefined &&<p id="price">₹{price} </p>}
+            <Description product={product}/>
+           
         </div>
     )
 }

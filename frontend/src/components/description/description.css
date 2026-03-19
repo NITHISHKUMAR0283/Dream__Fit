@@ -1,0 +1,51 @@
+
+.rating{
+  display: flex;
+  
+  font-family: Arial;
+  
+}
+.stars-outer{
+  position: relative;
+  display: inline-block;
+  line-height: 0.7;  
+  height: 10px;
+
+}
+.stars-outer::before{
+  content: "★★★★★";
+  color:#ccc;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 1.4rem;
+
+}
+.stars-inner{
+  position: absolute;
+  line-height: 0.7;
+  display: block;
+  top:0px;
+  left:0px;
+
+  overflow: hidden;
+
+}
+.stars-inner::before{
+  content: "★★★★★";
+  color:rgb(245, 209, 6);
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 1.4rem;
+}
+.rating{
+  gap: 6px;
+}
+#rating{
+  height: fit-content;
+  font-size:1rem;
+}
+#price{
+  margin-top: 5px;
+  font-weight: 550;
+  font-size: larger;
+  height: fit-content;
+  margin-bottom: 4px;
+}
