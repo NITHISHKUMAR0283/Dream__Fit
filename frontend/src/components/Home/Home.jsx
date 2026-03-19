@@ -1,12 +1,13 @@
 import React from 'react';
-import MenuIcon from '../assets/burger-menu.svg?react';
-import Search from '../assets/search-button.svg?react';
-import Cart from '../assets/shopping-cart.svg?react';
-import '../components/Home.css'
-import { Link } from 'react-router-dom';
+import MenuIcon from '../../assets/burger-menu.svg?react';
+import Search from '../../assets/search-button.svg?react';
+import Cart from '../../assets/shopping-cart.svg?react';
+import Product from '../Product/Product'
+import '../Home/Home.css'
 function Home(){
     return (
-        
+            <div>
+                
             <nav id="Nav-Bar">
                 <div id="left">
                     <MenuIcon className= "my-burger-style"/>
@@ -23,6 +24,8 @@ function Home(){
                 <Cart className ="Cart"/>
                 </div>     
             </nav>
+            <Product/>
+            </div>
         
     )
 }
