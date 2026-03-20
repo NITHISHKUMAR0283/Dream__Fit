@@ -212,7 +212,6 @@ function VariantManager({ product, credentials, onChanged, onBack }) {
         <>
           <div className="row-actions" style={{ justifyContent: "space-between", marginBottom: "16px" }}>
             <h3 style={{ margin: 0 }}>Manage Variants: {product.About}</h3>
-            {/* Removed 'Back to Products' button */}
           </div>
 
           {/* TIER 1: PRODUCT PREVIEW CARD */}
@@ -304,7 +303,6 @@ function VariantManager({ product, credentials, onChanged, onBack }) {
             <h3 style={{ margin: 0 }}>
               Edit Variant: {editVariant ? `${editVariant.selectedColorName === OTHER_COLOR_VALUE ? editVariant.customColorName : editVariant.selectedColorName} • ${editVariant.size}` : ""}
             </h3>
-            {/* Removed 'Back to Variants' button */}
           </div>
 
           {editVariant ? (

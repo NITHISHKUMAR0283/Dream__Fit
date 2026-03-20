@@ -1,3 +1,22 @@
+// Batch fetch property counts for multiple properties
+export async function getBatchPropertyCounts(properties) {
+  if (!Array.isArray(properties) || properties.length === 0) return {};
+  const results = {};
+  const uncached = properties.filter((prop) => !propertyCountsCache[prop]);
+  await Promise.all(
+    uncached.map(async (property) => {
+      const response = await fetch(`${ADMIN_API_BASE_URL}/property-counts/${property}`);
+      if (!response.ok) return;
+      const data = await response.json();
+      propertyCountsCache[property] = data;
+    })
+  );
+  savePropertyCountsCache();
+  properties.forEach((prop) => {
+    results[prop] = propertyCountsCache[prop] || null;
+  });
+  return results;
+}
 const PUBLIC_API_BASE_URL =
   import.meta.env.VITE_PUBLIC_API_BASE_URL || "http://localhost:3000/api/products";
 const ADMIN_API_BASE_URL =
@@ -31,10 +50,37 @@ const request = async (url, options = {}) => {
   return response.json();
 };
 
+// Simple in-memory cache for property counts
+const PROPERTY_COUNTS_STORAGE_KEY = 'adminPropertyCountsCache';
+let propertyCountsCache = {};
+// Load cache from localStorage
+try {
+  const stored = localStorage.getItem(PROPERTY_COUNTS_STORAGE_KEY);
+  if (stored) propertyCountsCache = JSON.parse(stored);
+} catch {}
+
+function savePropertyCountsCache() {
+  try {
+    localStorage.setItem(PROPERTY_COUNTS_STORAGE_KEY, JSON.stringify(propertyCountsCache));
+  } catch {}
+}
+
 export const getProducts = async () => {
   const payload = await request(PUBLIC_API_BASE_URL);
   return payload.data || [];
 };
+
+export async function getPropertyCounts(property) {
+  if (propertyCountsCache[property]) {
+    return propertyCountsCache[property];
+  }
+  const response = await fetch(`${ADMIN_API_BASE_URL}/property-counts/${property}`);
+  if (!response.ok) throw new Error("Failed to fetch property counts");
+  const data = await response.json();
+  propertyCountsCache[property] = data;
+  savePropertyCountsCache();
+  return data;
+}
 
 export const getProductById = async (productId) => {
   const payload = await request(`${PUBLIC_API_BASE_URL}/${productId}`);

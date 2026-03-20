@@ -1,3 +1,25 @@
+// Batch fetch property counts for multiple properties
+export async function fetchBatchPropertyCounts(properties) {
+  if (!Array.isArray(properties) || properties.length === 0) return {};
+  const results = {};
+  const uncached = properties.filter((prop) => !propertyCountsCache[prop]);
+  // Fetch uncached properties in parallel
+  await Promise.all(
+    uncached.map(async (property) => {
+      const response = await fetch(makeUrl(`/admin/property-counts/${property}`));
+      if (!response.ok) return;
+      const data = await response.json();
+      propertyCountsCache[property] = data;
+    })
+  );
+  // Save the cache
+  savePropertyCountsCache();
+  // Collect results from cache
+  properties.forEach((prop) => {
+    results[prop] = propertyCountsCache[prop] || null;
+  });
+  return results;
+}
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
 
 const makeUrl = (path) => `${API_BASE_URL}${path}`;
@@ -107,8 +129,29 @@ export const fetchProductById = async (id) => {
   return normalizeProduct(payload?.data || {});
 };
 
+// Simple in-memory cache for property counts
+const PROPERTY_COUNTS_STORAGE_KEY = 'propertyCountsCache';
+let propertyCountsCache = {};
+// Load cache from localStorage
+try {
+  const stored = localStorage.getItem(PROPERTY_COUNTS_STORAGE_KEY);
+  if (stored) propertyCountsCache = JSON.parse(stored);
+} catch {}
+
+function savePropertyCountsCache() {
+  try {
+    localStorage.setItem(PROPERTY_COUNTS_STORAGE_KEY, JSON.stringify(propertyCountsCache));
+  } catch {}
+}
+
 export async function fetchPropertyCounts(property) {
+  if (propertyCountsCache[property]) {
+    return propertyCountsCache[property];
+  }
   const response = await fetch(makeUrl(`/admin/property-counts/${property}`));
   if (!response.ok) throw new Error("Failed to fetch property counts");
-  return await response.json();
+  const data = await response.json();
+  propertyCountsCache[property] = data;
+  savePropertyCountsCache();
+  return data;
 }

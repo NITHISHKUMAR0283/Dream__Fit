@@ -1,5 +1,6 @@
 const PropertyCount = require("../model/propertyCountModel");
 const PriceRange = require("../model/priceRangeModel");
+const propertyCountCache = require("./propertyCountCache");
 
 async function incrementPropertyCount(property, value) {
   const doc = await PropertyCount.findOneAndUpdate(
@@ -25,8 +26,13 @@ async function decrementPropertyCount(property, value) {
 }
 
 async function getPropertyCounts(property) {
+  // Try cache first
+  const cached = propertyCountCache.getPropertyCount(property);
+  if (cached) return cached;
   const doc = await PropertyCount.findOne({ property });
-  return doc ? Object.fromEntries(doc.values) : {};
+  const result = doc ? Object.fromEntries(doc.values) : {};
+  propertyCountCache.setPropertyCount(property, result);
+  return result;
 }
 
 async function updatePriceRangeOnCreateOrUpdate(product) {
@@ -63,8 +69,25 @@ async function updatePriceRangeOnDelete() {
 }
 
 async function getPriceRange() {
+  // Try cache first
+  const cached = propertyCountCache.getPriceRange();
+  if (cached.min !== null && cached.max !== null) return cached;
   const doc = await PriceRange.findOne({});
-  return doc ? { min: doc.min, max: doc.max } : { min: 0, max: 0 };
+  const result = doc ? { min: doc.min, max: doc.max } : { min: 0, max: 0 };
+  propertyCountCache.setPriceRange(result.min, result.max);
+  return result;
+}
+
+// Batch update property counts for multiple properties
+async function batchIncrementPropertyCounts(propertyValues) {
+  const updates = Object.entries(propertyValues).map(([property, values]) => {
+    return PropertyCount.findOneAndUpdate(
+      { property },
+      { $inc: values },
+      { upsert: true, new: true }
+    );
+  });
+  return Promise.all(updates);
 }
 
 module.exports = {
@@ -73,5 +96,6 @@ module.exports = {
   getPropertyCounts,
   updatePriceRangeOnCreateOrUpdate,
   updatePriceRangeOnDelete,
-  getPriceRange
+  getPriceRange,
+  batchIncrementPropertyCounts,
 };

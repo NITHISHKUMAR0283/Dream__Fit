@@ -1049,10 +1049,7 @@ function ProductManager({ products, credentials, onChanged }) {
             <h2 className="panel-title">Variants: {selectedProduct.About}</h2>
             <p className="muted panel-subtitle">Total variants: {(selectedProduct.variants || []).length}</p>
           </div>
-          <div className="toolbar-actions">
-            <button onClick={() => openUpdateModal()}>Edit Product</button>
-            <button onClick={() => navigateToView("products", "", "")}>Back to Products</button>
-          </div>
+          {/* Removed toolbar-actions buttons */}
         </div>
 
         {/* VARIANTS GRID */}
