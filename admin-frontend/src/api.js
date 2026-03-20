@@ -17,12 +17,10 @@ export async function getBatchPropertyCounts(properties) {
   });
   return results;
 }
-const PUBLIC_API_BASE_URL =
-  import.meta.env.VITE_PUBLIC_API_BASE_URL || "http://localhost:3000/api/products";
-const ADMIN_API_BASE_URL =
-  import.meta.env.VITE_ADMIN_API_BASE_URL || "http://localhost:3000/api/admin/products";
-const ADMIN_UPLOAD_API_BASE_URL =
-  import.meta.env.VITE_ADMIN_UPLOAD_API_BASE_URL || "http://localhost:3000/api/admin/upload";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+const PUBLIC_API_BASE_URL = `${API_BASE_URL}/api/products`;
+const ADMIN_API_BASE_URL = `${API_BASE_URL}/api/admin/products`;
+const ADMIN_UPLOAD_API_BASE_URL = `${API_BASE_URL}/api/admin/upload`;
 
 const getHeaders = (credentials) => ({
   "Content-Type": "application/json",
