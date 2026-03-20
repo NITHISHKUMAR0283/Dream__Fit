@@ -6,6 +6,8 @@ const uniqueValues = (values) => [...new Set(values.filter(Boolean))];
 
 const toArray = (value) => (Array.isArray(value) ? value : []);
 
+const sanitizeString = (value) => typeof value === 'string' ? value.trim() : "";
+
 export const normalizeProduct = (product) => {
   const variants = toArray(product?.variants);
   const prices = variants
@@ -33,12 +35,12 @@ export const normalizeProduct = (product) => {
 
   return {
     ...product,
-    title: product?.name || product?.title || product?.About || "",
-    about: product?.About || "",
-    description: product?.description || "",
-    brand: product?.brand || "",
-    category: product?.category || "",
-    material: product?.material || "",
+    title: sanitizeString(product?.name || product?.title || product?.About) || "Untitled Product",
+    about: sanitizeString(product?.About),
+    description: sanitizeString(product?.description),
+    brand: sanitizeString(product?.brand),
+    category: sanitizeString(product?.category),
+    material: sanitizeString(product?.material),
     image,
     colors: uniqueValues(variants.map((variant) => variant?.color)),
     sizes: uniqueValues(variants.map((variant) => variant?.size)),
@@ -80,6 +82,17 @@ export const fetchProducts = async (options = {}) => {
     params.set("search", String(options.search).trim());
   }
 
+  if (Array.isArray(options.categories) && options.categories.length) {
+    const categoriesValue = options.categories
+      .map((entry) => String(entry || "").trim())
+      .filter(Boolean)
+      .join(",");
+
+    if (categoriesValue) {
+      params.set("categories", categoriesValue);
+    }
+  }
+
   const queryString = params.toString();
   const path = queryString ? `/api/products?${queryString}` : "/api/products";
 
@@ -93,3 +106,9 @@ export const fetchProductById = async (id) => {
   const payload = await handleResponse(response);
   return normalizeProduct(payload?.data || {});
 };
+
+export async function fetchPropertyCounts(property) {
+  const response = await fetch(makeUrl(`/admin/property-counts/${property}`));
+  if (!response.ok) throw new Error("Failed to fetch property counts");
+  return await response.json();
+}

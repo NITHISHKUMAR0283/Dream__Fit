@@ -4,6 +4,12 @@ const {
   getPublicIdsFromImageEntries,
   deleteCloudinaryAssets
 } = require("../services/cloudinaryCleanup");
+const {
+  incrementPropertyCount,
+  decrementPropertyCount,
+  updatePriceRangeOnCreateOrUpdate,
+  updatePriceRangeOnDelete
+} = require("../services/propertyCleanup");
 
 const escapeRegex = (value = "") => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
@@ -18,7 +24,18 @@ const createProduct = asyncHandler(async (req,res)=>{
       });
     }
 
-  const product = await Product.create(payload);
+    // Track property counts
+    if (payload.brand) await incrementPropertyCount("brand", payload.brand);
+    if (payload.material) await incrementPropertyCount("material", payload.material);
+    if (payload.category) await incrementPropertyCount("category", payload.category);
+    if (payload.variants && Array.isArray(payload.variants)) {
+      payload.variants.forEach(v => {
+        if (v.color) incrementPropertyCount("color", v.color);
+      });
+    }
+
+    const product = await Product.create(payload);
+    await updatePriceRangeOnCreateOrUpdate(product);
     res.status(201).json({
         message:"product created successfully",
         data : product
@@ -35,7 +52,18 @@ const updateProduct = asyncHandler(async (req,res)=>{
       });
     }
 
-  const product = await Product.findByIdAndUpdate(req.params.id,payload,{new:true,runValidators:true});
+    // Track property counts
+    if (payload.brand) await incrementPropertyCount("brand", payload.brand);
+    if (payload.material) await incrementPropertyCount("material", payload.material);
+    if (payload.category) await incrementPropertyCount("category", payload.category);
+    if (payload.variants && Array.isArray(payload.variants)) {
+      payload.variants.forEach(v => {
+        if (v.color) incrementPropertyCount("color", v.color);
+      });
+    }
+
+    const product = await Product.findByIdAndUpdate(req.params.id,payload,{new:true,runValidators:true});
+    await updatePriceRangeOnCreateOrUpdate(product);
     if(!product){
         return res.status(404).json({
             message:"cant find the product"
@@ -59,12 +87,20 @@ const deleteProduct = asyncHandler(async(req,res)=>{
       return res.status(404).json({ message: "Product not found" });
     }
 
+    // Decrement property counts
+    if (product.brand) await decrementPropertyCount("brand", product.brand);
+    if (product.material) await decrementPropertyCount("material", product.material);
+    if (product.category) await decrementPropertyCount("category", product.category);
+    (product.variants || []).forEach(v => {
+      if (v.color) decrementPropertyCount("color", v.color);
+    });
+
     const publicIds = (product.variants || [])
       .flatMap((variant) => getPublicIdsFromImageEntries(variant.images || []));
 
     await Product.findByIdAndDelete(req.params.id);
     await deleteCloudinaryAssets(publicIds);
-
+    await updatePriceRangeOnDelete();
     res.status(200).json({
         message:"product deleted successfully",
         data:product
@@ -76,19 +112,36 @@ const getProduct = asyncHandler(async (req, res) => {
   const limit = Math.max(parseInt(req.query.limit, 10) || 10, 1);
   const sort = req.query.sort;
   const search = String(req.query.search || "").trim();
+  const categoriesParam = String(req.query.categories || req.query.category || "").trim();
   const skip = (page - 1) * limit;
 
   const query = {};
+  if (categoriesParam) {
+    const categories = categoriesParam
+      .split(",")
+      .map((entry) => entry.trim())
+      .filter(Boolean);
+
+    if (categories.length) {
+      query.category = {
+        $in: categories.map((category) => new RegExp(`^${escapeRegex(category)}$`, "i"))
+      };
+    }
+  }
+
   if (search) {
-    const searchRegex = new RegExp(escapeRegex(search), "i");
+    // Fuzzy regex: allow partial, out-of-order, and character match
+    // Example: "milton" matches "Milton", "Milt0n", "MILT ON", etc.
+    const fuzzy = search.split("").map(c => escapeRegex(c)).join(".*");
+    const fuzzyRegex = new RegExp(fuzzy, "i");
     query.$or = [
-      { About: searchRegex },
-      { description: searchRegex },
-      { brand: searchRegex },
-      { category: searchRegex },
-      { material: searchRegex },
-      { "variants.color": searchRegex },
-      { "variants.size": searchRegex }
+      { About: fuzzyRegex },
+      { description: fuzzyRegex },
+      { brand: fuzzyRegex },
+      { category: fuzzyRegex },
+      { material: fuzzyRegex },
+      { "variants.color": fuzzyRegex },
+      { "variants.size": fuzzyRegex }
     ];
   }
 
@@ -224,5 +277,6 @@ module.exports = {
   addVariant,
   updateVariant,
   deleteVariant,
-  getVariant
+  getVariant,
+  cleanupUnusedProperties: require("../services/propertyCleanup").cleanupUnusedProperties
 };

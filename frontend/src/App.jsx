@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, Route, Routes, useNavigate } from 'react-router-dom';
+import { Link, Route, Routes, useNavigate, useLocation } from 'react-router-dom';
 import Product from './components/Product/Product'
 import MenuIcon from './assets/burger-menu.svg?react';
 import Search from './assets/search-button.svg?react';
@@ -13,6 +13,7 @@ import './App.css'
 
 function App(){
     const navigate = useNavigate();
+    const location = useLocation();
     const { totalItems } = useCart();
     const [menuOpen, setMenuOpen] = React.useState(false);
     const [searchQuery, setSearchQuery] = React.useState("");
@@ -35,6 +36,14 @@ function App(){
                     </button>
                     <Link to="/" id = "CompanyName">RIYANSHBABA</Link>
                     <Link to="/new-arrivals" className='hide-on-small nav-link'>NewArrivals</Link>
+                    {/* Home button: show only if not on homepage */}
+                    {location.pathname !== '/' && (
+                        <Link to="/" className="nav-link home-btn">Home</Link>
+                    )}
+                    {/* Cart button: show only if not on cart page */}
+                    {location.pathname !== '/cart' && (
+                        <Link to="/cart" className="nav-link cart-btn">Cart</Link>
+                    )}
                 </div>
                 <div id="right">
                 <div id="Search">

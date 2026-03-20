@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { addVariant, deleteVariant, updateProduct, updateVariant, uploadImages } from "../api";
+import { fetchPropertyCounts } from '../../api';
 
 const sizeSuggestions = ["XS", "S", "M", "L", "XL", "XXL", "28", "30", "32", "34", "36", "38", "40", "42", "44", "500ml", "750ml", "1L"];
 const STANDARD_COLORS = [
@@ -189,6 +190,21 @@ function VariantManager({ product, credentials, onChanged, onBack }) {
     setEditVariant((prev) => ({ ...(prev || {}), images: (prev?.images || []).filter((_, i) => i !== index) }));
   };
 
+  const [brandOptions, setBrandOptions] = React.useState([]);
+  const [materialOptions, setMaterialOptions] = React.useState([]);
+  const [categoryOptions, setCategoryOptions] = React.useState([]);
+  const [colorOptions, setColorOptions] = React.useState([]);
+
+  React.useEffect(() => {
+    async function loadPropertyCounts() {
+      setBrandOptions(Object.keys(await fetchPropertyCounts('brand')));
+      setMaterialOptions(Object.keys(await fetchPropertyCounts('material')));
+      setCategoryOptions(Object.keys(await fetchPropertyCounts('category')));
+      setColorOptions(Object.keys(await fetchPropertyCounts('color')));
+    }
+    loadPropertyCounts();
+  }, []);
+
   return (
     <div className="card">
       {!isEditingVariant ? (
@@ -196,7 +212,7 @@ function VariantManager({ product, credentials, onChanged, onBack }) {
         <>
           <div className="row-actions" style={{ justifyContent: "space-between", marginBottom: "16px" }}>
             <h3 style={{ margin: 0 }}>Manage Variants: {product.About}</h3>
-            <button type="button" onClick={onBack}>Back to Products</button>
+            {/* Removed 'Back to Products' button */}
           </div>
 
           {/* TIER 1: PRODUCT PREVIEW CARD */}
@@ -288,7 +304,7 @@ function VariantManager({ product, credentials, onChanged, onBack }) {
             <h3 style={{ margin: 0 }}>
               Edit Variant: {editVariant ? `${editVariant.selectedColorName === OTHER_COLOR_VALUE ? editVariant.customColorName : editVariant.selectedColorName} • ${editVariant.size}` : ""}
             </h3>
-            <button type="button" onClick={() => setIsEditingVariant(false)}>Back to Variants</button>
+            {/* Removed 'Back to Variants' button */}
           </div>
 
           {editVariant ? (

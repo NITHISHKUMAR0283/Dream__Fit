@@ -37,15 +37,25 @@ function Product({ limit, sort, searchQuery = "" }){
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
 
   useEffect(() => {
+    let isActive = true;
+
     const loadProducts = async () => {
       try {
-        setLoading(true);
-        setError("");
+        if (isActive) {
+          setLoading(true);
+          setError("");
+        }
+
         const response = await fetchProducts({
           limit,
           sort,
           search: String(searchQuery || "").trim()
         });
+
+        if (!isActive) {
+          return;
+        }
+
         setAllProducts(response);
         setFilteredProducts(response);
 
@@ -53,13 +63,21 @@ function Product({ limit, sort, searchQuery = "" }){
         localStorage.setItem(NAV_SUMMARY_KEY, JSON.stringify(summary));
         window.dispatchEvent(new CustomEvent("catalog-summary-updated", { detail: summary }));
       } catch (err) {
-        setError(err.message || "Failed to load products");
+        if (isActive) {
+          setError(err.message || "Failed to load products");
+        }
       } finally {
-        setLoading(false);
+        if (isActive) {
+          setLoading(false);
+        }
       }
     };
 
     loadProducts();
+
+    return () => {
+      isActive = false;
+    };
   }, [limit, sort, searchQuery]);
 
   const handleFilterChange = (filtered) => {

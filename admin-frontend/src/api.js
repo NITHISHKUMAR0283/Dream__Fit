@@ -117,3 +117,9 @@ export const uploadImages = async (credentials, files, folder = "products") => {
 
   throw new Error(lastError);
 };
+
+export const fetchPropertyCounts = async (property) => {
+  const response = await fetch(`${ADMIN_API_BASE_URL}/property-counts/${property}`);
+  if (!response.ok) throw new Error("Failed to fetch property counts");
+  return await response.json();
+};

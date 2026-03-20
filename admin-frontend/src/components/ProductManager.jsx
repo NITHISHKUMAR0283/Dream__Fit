@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createProduct, deleteProduct, updateProduct, uploadImages, addVariant, updateVariant, deleteVariant } from "../api";
+import { fetchPropertyCounts } from "../api";
 
 const NO_IMAGE_DATA_URI =
   "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80'><rect width='100%' height='100%' fill='%23f3f4f6'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='%236b7280' font-size='12'>No Image</text></svg>";
@@ -22,6 +23,9 @@ const STANDARD_COLORS = [
 const SIZE_SUGGESTIONS = ["XS", "S", "M", "L", "XL", "XXL", "XXXL", "30", "31", "32", "33", "34", "35", "36", "37", "38", "39", "40", "41", "42", "43"];
 const OTHER_COLOR_VALUE = "__OTHER_COLOR__";
 const CREATE_NEW_CATEGORY_VALUE = "__CREATE_NEW_CATEGORY__";
+const CREATE_NEW_BRAND_VALUE = "__CREATE_NEW_BRAND__";
+const CREATE_NEW_MATERIAL_VALUE = "__CREATE_NEW_MATERIAL__";
+const CREATE_NEW_SIZE_VALUE = "__CREATE_NEW_SIZE__";
 const DEFAULT_COLOR = STANDARD_COLORS[0].code;
 const DEFAULT_COLOR_NAME = STANDARD_COLORS[0].name;
 
@@ -57,8 +61,10 @@ function ProductManager({ products, credentials, onChanged }) {
   // CREATE PRODUCT FORM
   const [newAbout, setNewAbout] = useState("");
   const [newDescription, setNewDescription] = useState("");
-  const [newBrand, setNewBrand] = useState("");
-  const [newMaterial, setNewMaterial] = useState("");
+  const [newBrandSelection, setNewBrandSelection] = useState("");
+  const [newCustomBrand, setNewCustomBrand] = useState("");
+  const [newMaterialSelection, setNewMaterialSelection] = useState("");
+  const [newCustomMaterial, setNewCustomMaterial] = useState("");
   const [newCategorySelection, setNewCategorySelection] = useState("");
   const [newCustomCategory, setNewCustomCategory] = useState("");
   const [newPrimaryImageUrl, setNewPrimaryImageUrl] = useState("");
@@ -67,7 +73,8 @@ function ProductManager({ products, credentials, onChanged }) {
     selectedColorName: DEFAULT_COLOR_NAME,
     customColorName: "",
     customColorCode: DEFAULT_COLOR,
-    size: "",
+    sizeSelection: "",
+    customSize: "",
     mrp: "",
     price: "",
     stock: "",
@@ -80,6 +87,10 @@ function ProductManager({ products, credentials, onChanged }) {
   const [editDescription, setEditDescription] = useState("");
   const [editBrand, setEditBrand] = useState("");
   const [editMaterial, setEditMaterial] = useState("");
+  const [editBrandSelection, setEditBrandSelection] = useState("");
+  const [editCustomBrand, setEditCustomBrand] = useState("");
+  const [editMaterialSelection, setEditMaterialSelection] = useState("");
+  const [editCustomMaterial, setEditCustomMaterial] = useState("");
   const [editCategorySelection, setEditCategorySelection] = useState("");
   const [editCustomCategory, setEditCustomCategory] = useState("");
 
@@ -88,7 +99,8 @@ function ProductManager({ products, credentials, onChanged }) {
     selectedColorName: DEFAULT_COLOR_NAME,
     customColorName: "",
     customColorCode: DEFAULT_COLOR,
-    size: "",
+    sizeSelection: "",
+    customSize: "",
     mrp: "",
     price: "",
     stock: "",
@@ -124,11 +136,100 @@ function ProductManager({ products, credentials, onChanged }) {
       }
     });
 
+    // Remove 'StrainlessSteel', keep 'Stainless Steel'
+    return Array.from(uniqueByLower.values())
+      .filter((mat) => mat.toLowerCase() !== 'strainlesssteel')
+      .sort((left, right) => left.localeCompare(right));
+  }, [products]);
+
+  const existingBrands = useMemo(() => {
+    const uniqueByLower = new Map();
+
+    products.forEach((product) => {
+      const rawBrand = String(product?.brand || "").trim();
+      if (!rawBrand) {
+        return;
+      }
+
+      const lowerKey = rawBrand.toLowerCase();
+      if (!uniqueByLower.has(lowerKey)) {
+        uniqueByLower.set(lowerKey, rawBrand);
+      }
+    });
+
+    // Remove 'StrainlessSteel' and 'StainlessSteel', keep 'Stainless Steel'
+    return Array.from(uniqueByLower.values())
+      .filter((mat) => {
+        const lower = mat.toLowerCase();
+        return lower !== 'strainlesssteel' && lower !== 'stainlesssteel';
+      })
+      .sort((left, right) => left.localeCompare(right));
+  }, [products]);
+
+  const existingMaterials = useMemo(() => {
+    const uniqueByLower = new Map();
+
+    products.forEach((product) => {
+      const rawMaterial = String(product?.material || "").trim();
+      if (!rawMaterial) {
+        return;
+      }
+
+      const lowerKey = rawMaterial.toLowerCase();
+      if (!uniqueByLower.has(lowerKey)) {
+        uniqueByLower.set(lowerKey, rawMaterial);
+      }
+    });
+
+    return Array.from(uniqueByLower.values()).sort((left, right) => left.localeCompare(right));
+  }, [products]);
+
+  const existingSizes = useMemo(() => {
+    const uniqueByLower = new Map();
+
+    products.forEach((product) => {
+      (product.variants || []).forEach((variant) => {
+        const rawSize = String(variant?.size || "").trim();
+        if (!rawSize) {
+          return;
+        }
+
+        const lowerKey = rawSize.toLowerCase();
+        if (!uniqueByLower.has(lowerKey)) {
+          uniqueByLower.set(lowerKey, rawSize);
+        }
+      });
+    });
+
     return Array.from(uniqueByLower.values()).sort((left, right) => left.localeCompare(right));
   }, [products]);
 
   const resolveCategoryValue = (selection, customValue) => {
     if (selection === CREATE_NEW_CATEGORY_VALUE) {
+      return (customValue || "").trim();
+    }
+
+    return (selection || "").trim();
+  };
+
+  const resolveBrandValue = (selection, customValue) => {
+    if (selection === CREATE_NEW_BRAND_VALUE) {
+      return (customValue || "").trim();
+    }
+
+    return (selection || "").trim();
+  };
+
+  const resolveMaterialValue = (selection, customValue) => {
+    if (selection === CREATE_NEW_MATERIAL_VALUE) {
+      return (customValue || "").trim();
+    }
+
+    return (selection || "").trim();
+  };
+
+  const resolveSizeValue = (selection, customValue) => {
+    if (selection === CREATE_NEW_SIZE_VALUE) {
       return (customValue || "").trim();
     }
 
@@ -278,7 +379,8 @@ function ProductManager({ products, credentials, onChanged }) {
       alert("Primary image is required");
       return;
     }
-    if (!newVariant.size.trim()) {
+    const resolvedSize = resolveSizeValue(newVariant.sizeSelection, newVariant.customSize);
+    if (!resolvedSize) {
       alert("Size is required for first variant");
       return;
     }
@@ -296,18 +398,21 @@ function ProductManager({ products, credentials, onChanged }) {
     }
 
     const colorPayload = getColorPayload(newVariant);
+    const resolvedBrand = resolveBrandValue(newBrandSelection, newCustomBrand);
+    const resolvedMaterial = resolveMaterialValue(newMaterialSelection, newCustomMaterial);
+    
     await createProduct(credentials, {
       About: about,
       description: newDescription.trim(),
-      brand: newBrand.trim(),
-      material: newMaterial.trim(),
+      brand: resolvedBrand,
+      material: resolvedMaterial,
       category: resolveCategoryValue(newCategorySelection, newCustomCategory),
       primaryImage: { url: newPrimaryImageUrl },
       variants: [
         {
           color: colorPayload.color,
           colorCode: colorPayload.colorCode,
-          size: newVariant.size.trim(),
+          size: resolvedSize,
           mrp: toNumberOrZero(newVariant.mrp),
           price: toNumberOrZero(newVariant.price),
           stock: toNumberOrZero(newVariant.stock),
@@ -319,8 +424,10 @@ function ProductManager({ products, credentials, onChanged }) {
     // Reset form
     setNewAbout("");
     setNewDescription("");
-    setNewBrand("");
-    setNewMaterial("");
+    setNewBrandSelection("");
+    setNewCustomBrand("");
+    setNewMaterialSelection("");
+    setNewCustomMaterial("");
     setNewCategorySelection("");
     setNewCustomCategory("");
     setNewPrimaryImageUrl("");
@@ -328,7 +435,8 @@ function ProductManager({ products, credentials, onChanged }) {
       selectedColorName: DEFAULT_COLOR_NAME,
       customColorName: "",
       customColorCode: DEFAULT_COLOR,
-      size: "",
+      sizeSelection: "",
+      customSize: "",
       mrp: "",
       price: "",
       stock: "",
@@ -350,8 +458,8 @@ function ProductManager({ products, credentials, onChanged }) {
       ...selectedProduct,
       About: about,
       description: editDescription.trim(),
-      brand: editBrand.trim(),
-      material: editMaterial.trim(),
+      brand: resolveBrandValue(editBrandSelection, editCustomBrand),
+      material: resolveMaterialValue(editMaterialSelection, editCustomMaterial),
       category: resolveCategoryValue(editCategorySelection, editCustomCategory)
     };
 
@@ -478,7 +586,33 @@ function ProductManager({ products, credentials, onChanged }) {
     setEditAbout(productToEdit.About || "");
     setEditDescription(productToEdit.description || "");
     setEditBrand(productToEdit.brand || "");
+    const normalizedBrand = String(productToEdit.brand || "").trim();
+    const hasExistingBrand = existingBrands.some((brand) => brand.toLowerCase() === normalizedBrand.toLowerCase());
+    if (!normalizedBrand) {
+      setEditBrandSelection("");
+      setEditCustomBrand("");
+    } else if (hasExistingBrand) {
+      const matchedBrand = existingBrands.find((brand) => brand.toLowerCase() === normalizedBrand.toLowerCase()) || normalizedBrand;
+      setEditBrandSelection(matchedBrand);
+      setEditCustomBrand("");
+    } else {
+      setEditBrandSelection(CREATE_NEW_BRAND_VALUE);
+      setEditCustomBrand(normalizedBrand);
+    }
     setEditMaterial(productToEdit.material || "");
+    const normalizedMaterial = String(productToEdit.material || "").trim();
+    const hasExistingMaterial = existingMaterials.some((material) => material.toLowerCase() === normalizedMaterial.toLowerCase());
+    if (!normalizedMaterial) {
+      setEditMaterialSelection("");
+      setEditCustomMaterial("");
+    } else if (hasExistingMaterial) {
+      const matchedMaterial = existingMaterials.find((material) => material.toLowerCase() === normalizedMaterial.toLowerCase()) || normalizedMaterial;
+      setEditMaterialSelection(matchedMaterial);
+      setEditCustomMaterial("");
+    } else {
+      setEditMaterialSelection(CREATE_NEW_MATERIAL_VALUE);
+      setEditCustomMaterial(normalizedMaterial);
+    }
     const normalizedCategory = String(productToEdit.category || "").trim();
     const hasExistingCategory = existingCategories.some((category) => category.toLowerCase() === normalizedCategory.toLowerCase());
 
@@ -661,9 +795,53 @@ function ProductManager({ products, credentials, onChanged }) {
                     <label className="field-label">Description</label>
                     <textarea className="fixed-textbox" placeholder="Detailed Description" value={newDescription} onChange={(e) => setNewDescription(e.target.value)} />
                     <label className="field-label">Brand</label>
-                    <input placeholder="Brand" value={newBrand} onChange={(e) => setNewBrand(e.target.value)} />
+                    <select
+                      value={newBrandSelection}
+                      onChange={(e) => {
+                        const selectedValue = e.target.value;
+                        setNewBrandSelection(selectedValue);
+                        if (selectedValue !== CREATE_NEW_BRAND_VALUE) {
+                          setNewCustomBrand("");
+                        }
+                      }}
+                    >
+                      <option value="">Select Brand</option>
+                      {existingBrands.map((brand) => (
+                        <option key={brand} value={brand}>{brand}</option>
+                      ))}
+                      <option value={CREATE_NEW_BRAND_VALUE}>+ Create New Brand</option>
+                    </select>
+                    {newBrandSelection === CREATE_NEW_BRAND_VALUE && (
+                      <input
+                        value={newCustomBrand}
+                        placeholder="Enter new brand"
+                        onChange={(e) => setNewCustomBrand(e.target.value)}
+                      />
+                    )}
                     <label className="field-label">Material</label>
-                    <input placeholder="Material" value={newMaterial} onChange={(e) => setNewMaterial(e.target.value)} />
+                    <select
+                      value={newMaterialSelection}
+                      onChange={(e) => {
+                        const selectedValue = e.target.value;
+                        setNewMaterialSelection(selectedValue);
+                        if (selectedValue !== CREATE_NEW_MATERIAL_VALUE) {
+                          setNewCustomMaterial("");
+                        }
+                      }}
+                    >
+                      <option value="">Select Material</option>
+                      {existingMaterials.map((material) => (
+                        <option key={material} value={material}>{material}</option>
+                      ))}
+                      <option value={CREATE_NEW_MATERIAL_VALUE}>+ Create New Material</option>
+                    </select>
+                    {newMaterialSelection === CREATE_NEW_MATERIAL_VALUE && (
+                      <input
+                        value={newCustomMaterial}
+                        placeholder="Enter new material"
+                        onChange={(e) => setNewCustomMaterial(e.target.value)}
+                      />
+                    )}
                     <label className="field-label">Category</label>
                     <select
                       value={newCategorySelection}
@@ -778,9 +956,53 @@ function ProductManager({ products, credentials, onChanged }) {
                   <label className="field-label">Description</label>
                   <textarea className="fixed-textbox" value={editDescription} onChange={(e) => setEditDescription(e.target.value)} />
                   <label className="field-label">Brand</label>
-                  <input value={editBrand} onChange={(e) => setEditBrand(e.target.value)} />
+                  <select
+                    value={editBrandSelection}
+                    onChange={(e) => {
+                      const selectedValue = e.target.value;
+                      setEditBrandSelection(selectedValue);
+                      if (selectedValue !== CREATE_NEW_BRAND_VALUE) {
+                        setEditCustomBrand("");
+                      }
+                    }}
+                  >
+                    <option value="">Select Brand</option>
+                    {existingBrands.map((brand) => (
+                      <option key={brand} value={brand}>{brand}</option>
+                    ))}
+                    <option value={CREATE_NEW_BRAND_VALUE}>+ Create New Brand</option>
+                  </select>
+                  {editBrandSelection === CREATE_NEW_BRAND_VALUE && (
+                    <input
+                      value={editCustomBrand}
+                      placeholder="Enter new brand"
+                      onChange={(e) => setEditCustomBrand(e.target.value)}
+                    />
+                  )}
                   <label className="field-label">Material</label>
-                  <input value={editMaterial} onChange={(e) => setEditMaterial(e.target.value)} />
+                  <select
+                    value={editMaterialSelection}
+                    onChange={(e) => {
+                      const selectedValue = e.target.value;
+                      setEditMaterialSelection(selectedValue);
+                      if (selectedValue !== CREATE_NEW_MATERIAL_VALUE) {
+                        setEditCustomMaterial("");
+                      }
+                    }}
+                  >
+                    <option value="">Select Material</option>
+                    {existingMaterials.map((material) => (
+                      <option key={material} value={material}>{material}</option>
+                    ))}
+                    <option value={CREATE_NEW_MATERIAL_VALUE}>+ Create New Material</option>
+                  </select>
+                  {editMaterialSelection === CREATE_NEW_MATERIAL_VALUE && (
+                    <input
+                      value={editCustomMaterial}
+                      placeholder="Enter new material"
+                      onChange={(e) => setEditCustomMaterial(e.target.value)}
+                    />
+                  )}
                   <label className="field-label">Category</label>
                   <select
                     value={editCategorySelection}

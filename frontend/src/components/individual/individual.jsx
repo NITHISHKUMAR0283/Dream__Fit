@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { fetchProductById, fetchProducts } from '../../api';
+import { fetchProductById, fetchProducts, fetchPropertyCounts } from '../../api';
 import { useCart } from '../../context/CartContext';
 import './individual.css';
 
@@ -146,19 +146,22 @@ function Individual() {
     const variants = product?.variants || [];
     const hasRange = product?.minPrice !== null && product?.maxPrice !== null && product?.minPrice !== product?.maxPrice;
 
-    const colorOptions = Array.from(
-        new Map(
-            variants
-                .filter((variant) => variant?.color)
-                .map((variant) => [
-                    normalizeColorKey(variant.color),
-                    {
-                        colorName: (variant.color || "").trim(),
-                        colorCode: (variant.colorCode || (isHexColor(variant.color) ? variant.color : "#d1d5db"))
-                    }
-                ])
-        ).entries()
-    ).map(([colorKey, colorData]) => ({ colorKey, ...colorData }));
+    const [brandOptions, setBrandOptions] = React.useState([]);
+    const [materialOptions, setMaterialOptions] = React.useState([]);
+    const [categoryOptions, setCategoryOptions] = React.useState([]);
+    const [colorOptions, setColorOptions] = React.useState([]);
+
+    React.useEffect(() => {
+        async function loadPropertyCounts() {
+            setBrandOptions(Object.keys(await fetchPropertyCounts('brand')));
+            setMaterialOptions(Object.keys(await fetchPropertyCounts('material')));
+            setCategoryOptions(Object.keys(await fetchPropertyCounts('category')));
+            setColorOptions(Object.keys(await fetchPropertyCounts('color')));
+        }
+        loadPropertyCounts();
+    }, []);
+
+    const colorOptionsForDropdown = colorOptions.filter((color) => color !== "");
 
     const sizeOptions = Array.from(
         new Set(
@@ -264,15 +267,17 @@ function Individual() {
         }
 
         let message = "🛒 *Order Details*\n\n";
-        message += `1. ${product.title}\n`;
-        message += `   Brand: ${product.brand || "-"}\n`;
-        message += `   Material: ${product.material || "-"}\n`;
-        message += `   Color: ${selectedVariant?.color || "-"}\n`;
-        message += `   Size: ${selectedSize}\n`;
-        message += `   Qty: 1\n`;
-        message += `   Price: ₹${selectedPrice}\n`;
-        message += `   Line Total: ₹${selectedPrice}\n\n`;
-        message += `💰 *Total: ₹${selectedPrice}*`;
+        message += `ProductID: ${product._id}\n`;
+        message += `Title: ${product.title}\n`;
+        message += `Brand: ${product.brand || "-"}\n`;
+        message += `Material: ${product.material || "-"}\n`;
+        message += `Category: ${product.category || "-"}\n`;
+        message += `Color: ${selectedVariant?.color || "-"}\n`;
+        message += `Size: ${selectedSize}\n`;
+        message += `Qty: 1\n`;
+        message += `Price: ₹${selectedPrice}\n`;
+        message += `LineTotal: ₹${selectedPrice}\n`;
+        message += `💰 Total: ₹${selectedPrice}`;
 
         const phone = "918807043986";
         const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
