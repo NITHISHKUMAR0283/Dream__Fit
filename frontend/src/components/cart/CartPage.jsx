@@ -18,6 +18,7 @@ function CartPage() {
     items.forEach((item, index) => {
       message += `${index + 1}. ${item.title}\n`;
       message += `   Brand: ${item.brand || "-"}\n`;
+      message += `   Material: ${item.material || "-"}\n`;
       message += `   Color: ${item.color}\n`;
       message += `   Size: ${item.size}\n`;
       message += `   Qty: ${item.quantity}\n`;
@@ -61,6 +62,7 @@ function CartPage() {
             <div className="cart-item-info">
               <h3>{item.title}</h3>
               <p>Brand: {item.brand || "-"}</p>
+              <p>Material: {item.material || "-"}</p>
               <p>
                 Color: {item.color} • Size: {item.size}
               </p>

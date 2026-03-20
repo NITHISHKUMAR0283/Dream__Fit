@@ -73,6 +73,7 @@ export function CartProvider({ children }) {
           title: product.title,
           brand: product.brand || "",
           category: product.category || "",
+          material: product.material || "",
           description: product.description || "",
           image: product.image,
           color: selectedColor,

@@ -43,7 +43,7 @@ const Footer = () => (
               </svg>
             }
             label="Instagram"
-            href="https://instagram.com/riyanshbaba"
+            href="#"
           />
           <SocialLink
             icon={
@@ -52,7 +52,7 @@ const Footer = () => (
               </svg>
             }
             label="Facebook"
-            href="https://facebook.com/riyanshbaba"
+            href="#"
           />
         </div>
       </div>

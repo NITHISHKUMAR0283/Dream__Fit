@@ -5,6 +5,8 @@ const {
   deleteCloudinaryAssets
 } = require("../services/cloudinaryCleanup");
 
+const escapeRegex = (value = "") => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 
 const createProduct = asyncHandler(async (req,res)=>{
     const payload = { ...req.body };
@@ -70,10 +72,25 @@ const deleteProduct = asyncHandler(async(req,res)=>{
     )
 });
 const getProduct = asyncHandler(async (req, res) => {
-    const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
-    const limit = Math.max(parseInt(req.query.limit, 10) || 10, 1);
+  const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+  const limit = Math.max(parseInt(req.query.limit, 10) || 10, 1);
   const sort = req.query.sort;
-    const skip = (page - 1) * limit;
+  const search = String(req.query.search || "").trim();
+  const skip = (page - 1) * limit;
+
+  const query = {};
+  if (search) {
+    const searchRegex = new RegExp(escapeRegex(search), "i");
+    query.$or = [
+      { About: searchRegex },
+      { description: searchRegex },
+      { brand: searchRegex },
+      { category: searchRegex },
+      { material: searchRegex },
+      { "variants.color": searchRegex },
+      { "variants.size": searchRegex }
+    ];
+  }
 
   let sortOption = {};
   if (sort === "latest") {
@@ -82,10 +99,10 @@ const getProduct = asyncHandler(async (req, res) => {
     sortOption = { _id: 1 };
   }
 
-    const [products, totalProducts] = await Promise.all([
-    Product.find({}).sort(sortOption).skip(skip).limit(limit),
-        Product.countDocuments({})
-    ]);
+  const [products, totalProducts] = await Promise.all([
+    Product.find(query).sort(sortOption).skip(skip).limit(limit),
+    Product.countDocuments(query)
+  ]);
 
     const totalPages = Math.ceil(totalProducts / limit);
 

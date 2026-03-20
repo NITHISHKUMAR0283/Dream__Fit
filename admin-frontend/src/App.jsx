@@ -1,17 +1,9 @@
 import React, { useEffect, useState } from "react";
 import LoginForm from "./components/LoginForm";
 import ProductManager from "./components/ProductManager";
-import VariantManager from "./components/VariantManager";
 import { getProducts } from "./api";
 
 const STORAGE_KEY = "adminCredentials";
-const ADMIN_VIEWS = [
-  { id: "create", label: "Create Product" },
-  { id: "read", label: "View Products" },
-  { id: "update", label: "Update Product" },
-  { id: "delete", label: "Delete Product" },
-  { id: "variants", label: "Manage Variants" }
-];
 
 function App() {
   const [credentials, setCredentials] = useState(() => {
@@ -21,10 +13,6 @@ function App() {
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const [activeView, setActiveView] = useState("create");
-  const [selectedVariantProductId, setSelectedVariantProductId] = useState("");
-
-  const selectedVariantProduct = products.find((product) => product._id === selectedVariantProductId) || null;
 
   const loadProducts = async () => {
     try {
@@ -53,66 +41,66 @@ function App() {
     localStorage.removeItem(STORAGE_KEY);
   };
 
-  const handleManageVariants = (productId) => {
-    setSelectedVariantProductId(productId);
-    setActiveView("variant-crud");
-  };
-
-  const handleBackFromVariants = () => {
-    setActiveView("variants");
-  };
+  const totalVariants = products.reduce((count, product) => count + (product.variants || []).length, 0);
 
   return (
-    <main className="app-shell">
-      <header className="admin-nav">
-        <div className="admin-left">
-          <div className="brand">RIYANSHBABA</div>
-          <span className="tag">Admin Panel</span>
-        </div>
-        {credentials ? <button onClick={handleLogout}>Logout</button> : null}
-      </header>
-
+    <main className="admin-layout">
       {credentials ? (
-        <div className="admin-action-nav card">
-          <div className="content-label">Choose Action</div>
-          <div className="row-actions wrap">
-            {ADMIN_VIEWS.map((view) => (
-              <button
-                key={view.id}
-                type="button"
-                className={activeView === view.id ? "active-tab" : "ghost-tab"}
-                onClick={() => setActiveView(view.id)}
-              >
-                {view.label}
-              </button>
-            ))}
+        <aside className="admin-sidebar">
+          <div className="sidebar-brand">
+            <div className="brand">RIYANSHBABA</div>
+            <span className="tag">Commerce Admin</span>
           </div>
-        </div>
+
+          <div className="sidebar-section">
+            <div className="sidebar-label">Overview</div>
+            <div className="sidebar-metric">
+              <span>Total Products</span>
+              <strong>{products.length}</strong>
+            </div>
+            <div className="sidebar-metric">
+              <span>Total Variants</span>
+              <strong>{totalVariants}</strong>
+            </div>
+          </div>
+
+          <div className="sidebar-section">
+            <div className="sidebar-label">Workspace</div>
+            <button type="button" className="sidebar-action" onClick={loadProducts}>Refresh Catalog</button>
+          </div>
+        </aside>
       ) : null}
 
-      {error ? <div className="card error">{error}</div> : null}
+      <div className="app-shell">
+        <header className="admin-nav">
+          <div className="admin-left">
+            <h1 className="page-title">Catalog Management</h1>
+            <p className="page-subtitle">Manage products, variants, pricing and inventory</p>
+          </div>
+          {credentials ? (
+            <div className="admin-top-actions">
+              <span className="admin-user">{credentials.email}</span>
+              <button onClick={handleLogout}>Logout</button>
+            </div>
+          ) : null}
+        </header>
 
-      {!credentials ? (
-        <LoginForm onLogin={handleLogin} />
-      ) : isLoading ? (
-        <div className="card">Loading...</div>
-      ) : activeView === "variant-crud" && selectedVariantProduct ? (
-        <VariantManager
-          key={selectedVariantProduct._id}
-          product={selectedVariantProduct}
-          credentials={credentials}
-          onChanged={loadProducts}
-          onBack={handleBackFromVariants}
-        />
-      ) : (
-        <ProductManager
-          products={products}
-          credentials={credentials}
-          onChanged={loadProducts}
-          mode={activeView}
-          onManageVariants={handleManageVariants}
-        />
-      )}
+        {error ? <div className="card error">{error}</div> : null}
+
+        {!credentials ? (
+          <div className="auth-shell">
+            <LoginForm onLogin={handleLogin} />
+          </div>
+        ) : isLoading ? (
+          <div className="card">Loading dashboard data...</div>
+        ) : (
+          <ProductManager
+            products={products}
+            credentials={credentials}
+            onChanged={loadProducts}
+          />
+        )}
+      </div>
     </main>
   );
 }

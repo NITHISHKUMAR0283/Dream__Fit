@@ -1,11 +1,34 @@
 import '../Product/product.css'
 import ProductCard from "./ProductCard";
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {useNavigate} from 'react-router-dom';
 import { fetchProducts } from '../../api';
 import Filter from '../Filter/Filter';
 
-function Product({ limit, sort }){
+const NAV_SUMMARY_KEY = "catalogNavSummary";
+
+const buildNavSummary = (products = []) => {
+  const brandSet = new Set();
+  const categorySet = new Set();
+
+  products.forEach((product) => {
+    if (product.brand) {
+      brandSet.add(product.brand);
+    }
+    if (product.category) {
+      categorySet.add(product.category);
+    }
+  });
+
+  return {
+    totalProducts: products.length,
+    totalBrands: brandSet.size,
+    totalCategories: categorySet.size,
+    updatedAt: Date.now()
+  };
+};
+
+function Product({ limit, sort, searchQuery = "" }){
   const navigate = useNavigate();
   const [allProducts, setAllProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
@@ -18,9 +41,17 @@ function Product({ limit, sort }){
       try {
         setLoading(true);
         setError("");
-        const response = await fetchProducts({ limit, sort });
+        const response = await fetchProducts({
+          limit,
+          sort,
+          search: String(searchQuery || "").trim()
+        });
         setAllProducts(response);
         setFilteredProducts(response);
+
+        const summary = buildNavSummary(response);
+        localStorage.setItem(NAV_SUMMARY_KEY, JSON.stringify(summary));
+        window.dispatchEvent(new CustomEvent("catalog-summary-updated", { detail: summary }));
       } catch (err) {
         setError(err.message || "Failed to load products");
       } finally {
@@ -29,11 +60,36 @@ function Product({ limit, sort }){
     };
 
     loadProducts();
-  }, [limit, sort]);
+  }, [limit, sort, searchQuery]);
 
   const handleFilterChange = (filtered) => {
     setFilteredProducts(filtered);
   };
+
+  const normalizedSearchQuery = String(searchQuery || "").trim().toLowerCase();
+
+  const visibleProducts = useMemo(() => {
+    if (!normalizedSearchQuery) {
+      return filteredProducts;
+    }
+
+    return filteredProducts.filter((product) => {
+      const searchableParts = [
+        product?.title,
+        product?.about,
+        product?.description,
+        product?.brand,
+        product?.category,
+        product?.material,
+        ...(product?.colors || []),
+        ...(product?.sizes || [])
+      ]
+        .map((value) => String(value || "").toLowerCase())
+        .filter(Boolean);
+
+      return searchableParts.some((part) => part.includes(normalizedSearchQuery));
+    });
+  }, [filteredProducts, normalizedSearchQuery]);
 
   if (loading) {
     return <p className="product-feedback">Loading products...</p>;
@@ -73,14 +129,14 @@ function Product({ limit, sort }){
             </svg>
             Filters
           </button>
-          <p className="product-count">{filteredProducts.length} products</p>
+          <p className="product-count">{visibleProducts.length} products</p>
         </div>
 
-        {filteredProducts.length === 0 ? (
+        {visibleProducts.length === 0 ? (
           <p className="product-feedback">No products match your filters.</p>
         ) : (
           <div className="products-container">
-            {filteredProducts.map((p) => (
+            {visibleProducts.map((p) => (
               <ProductCard onClick={()=>navigate(`/product/${p._id}`)} key={p._id} product={p} />
             ))}
           </div>

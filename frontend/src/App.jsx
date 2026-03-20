@@ -9,12 +9,22 @@ import CartPage from './components/cart/CartPage';
 import Footer from './components/Footer/Footer';
 import { useCart } from './context/CartContext';
 import './App.css'
+
+
 function App(){
     const navigate = useNavigate();
     const { totalItems } = useCart();
     const [menuOpen, setMenuOpen] = React.useState(false);
+    const [searchQuery, setSearchQuery] = React.useState("");
 
     const closeMenu = () => setMenuOpen(false);
+
+    const handleSearchKeyDown = (event) => {
+        if (event.key === "Enter") {
+            navigate('/');
+            closeMenu();
+        }
+    };
 
     return (
         <div className="app-shell">
@@ -28,10 +38,15 @@ function App(){
                 </div>
                 <div id="right">
                 <div id="Search">
-                    
                     <Search className="search_icon"/>
-                    <input id="Input" type="text" />
-                    
+                    <input
+                        id="Input"
+                        type="text"
+                        placeholder="Search by product, brand, category..."
+                        value={searchQuery}
+                        onChange={(event) => setSearchQuery(event.target.value)}
+                        onKeyDown={handleSearchKeyDown}
+                    />
                 </div>
                 <button type="button" className="cart-button" onClick={() => navigate('/cart')}>
                     <Cart className ="Cart"/>
@@ -50,8 +65,8 @@ function App(){
 
             <main className="app-main">
                 <Routes>
-                    <Route path="/" element={<Product/>}></Route>
-                    <Route path="/new-arrivals" element={<Product limit={50} sort="latest"/>}></Route>
+                    <Route path="/" element={<Product searchQuery={searchQuery} />}></Route>
+                    <Route path="/new-arrivals" element={<Product limit={50} sort="latest" searchQuery={searchQuery} />}></Route>
                     <Route path="/product/:id" element={<IndividualProduct/>}></Route> 
                     <Route path="/cart" element={<CartPage/>}></Route> 
                 </Routes>

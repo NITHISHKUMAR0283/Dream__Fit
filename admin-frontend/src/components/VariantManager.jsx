@@ -93,42 +93,18 @@ const mapToPayload = (variant) => ({
 
 function VariantManager({ product, credentials, onChanged, onBack }) {
   const variants = useMemo(() => product.variants || [], [product.variants]);
-  const [selectedVariantId, setSelectedVariantId] = useState(variants[0]?._id || "");
-  const [productMeta, setProductMeta] = useState({
-    About: product?.About || "",
-    description: product?.description || "",
-    brand: product?.brand || "",
-    category: product?.category || ""
-  });
-  const [newVariant, setNewVariant] = useState({
-    selectedColorName: DEFAULT_COLOR_NAME,
-    customColorName: "",
-    customColorCode: DEFAULT_COLOR,
-    size: "",
-    mrp: "",
-    price: "",
-    stock: "",
-    images: []
-  });
+  const [selectedVariantId, setSelectedVariantId] = useState("");
+  const [isEditingVariant, setIsEditingVariant] = useState(false);
   const [editVariant, setEditVariant] = useState(null);
-  const [newUploading, setNewUploading] = useState(false);
   const [editUploading, setEditUploading] = useState(false);
 
   React.useEffect(() => {
-    setProductMeta({
-      About: product?.About || "",
-      description: product?.description || "",
-      brand: product?.brand || "",
-      category: product?.category || ""
-    });
-  }, [product]);
+    if (!selectedVariantId) {
+      setEditVariant(null);
+      return;
+    }
 
-  const selectedVariant = useMemo(
-    () => variants.find((variant) => variant._id === selectedVariantId) || null,
-    [variants, selectedVariantId]
-  );
-
-  React.useEffect(() => {
+    const selectedVariant = variants.find((variant) => variant._id === selectedVariantId);
     if (!selectedVariant) {
       setEditVariant(null);
       return;
@@ -143,11 +119,7 @@ function VariantManager({ product, credentials, onChanged, onBack }) {
       stock: selectedVariant.stock?.toString() || "",
       images: (selectedVariant.images || []).map((entry) => entry.url).filter(Boolean)
     });
-  }, [selectedVariant]);
-
-  const setNewField = (field, value) => {
-    setNewVariant((prev) => ({ ...prev, [field]: value }));
-  };
+  }, [selectedVariantId, variants]);
 
   const setEditField = (field, value) => {
     setEditVariant((prev) => ({ ...(prev || {}), [field]: value }));
@@ -186,31 +158,14 @@ function VariantManager({ product, credentials, onChanged, onBack }) {
     return true;
   };
 
-  const handleAddVariant = async () => {
-    if (!validateVariant(newVariant)) {
-      return;
-    }
-
-    await addVariant(credentials, product._id, mapToPayload(newVariant));
-    setNewVariant({
-      selectedColorName: DEFAULT_COLOR_NAME,
-      customColorName: "",
-      customColorCode: DEFAULT_COLOR,
-      size: "",
-      mrp: "",
-      price: "",
-      stock: "",
-      images: []
-    });
-    await onChanged();
-  };
-
   const handleUpdateVariant = async () => {
     if (!editVariant || !validateVariant(editVariant)) {
       return;
     }
 
     await updateVariant(credentials, product._id, editVariant._id, mapToPayload(editVariant));
+    setIsEditingVariant(false);
+    setSelectedVariantId("");
     await onChanged();
   };
 
@@ -226,254 +181,202 @@ function VariantManager({ product, credentials, onChanged, onBack }) {
 
     await deleteVariant(credentials, product._id, editVariant._id);
     setSelectedVariantId("");
+    setIsEditingVariant(false);
     await onChanged();
-  };
-
-  const removeNewImage = (index) => {
-    setNewVariant((prev) => ({ ...prev, images: prev.images.filter((_, i) => i !== index) }));
   };
 
   const removeEditImage = (index) => {
     setEditVariant((prev) => ({ ...(prev || {}), images: (prev?.images || []).filter((_, i) => i !== index) }));
   };
 
-  const handleUpdateProductMeta = async () => {
-    if (!productMeta.About.trim()) {
-      alert("Product About is required");
-      return;
-    }
-
-    await updateProduct(credentials, product._id, {
-      ...product,
-      About: productMeta.About.trim(),
-      description: (productMeta.description || "").trim(),
-      brand: (productMeta.brand || "").trim(),
-      category: (productMeta.category || "").trim()
-    });
-
-    await onChanged();
-  };
-
   return (
     <div className="card">
-      <div className="row-actions" style={{ justifyContent: "space-between", marginBottom: "8px" }}>
-        <h3 style={{ margin: 0 }}>Manage Variants: {product.About}</h3>
-        <button type="button" onClick={onBack}>Back to Products</button>
-      </div>
+      {!isEditingVariant ? (
+        // THREE-TIER: PRODUCT PREVIEW + VARIANT LIST
+        <>
+          <div className="row-actions" style={{ justifyContent: "space-between", marginBottom: "16px" }}>
+            <h3 style={{ margin: 0 }}>Manage Variants: {product.About}</h3>
+            <button type="button" onClick={onBack}>Back to Products</button>
+          </div>
 
-      <div className="variant-card">
-        <h4>Product Details (for this product)</h4>
-        <div className="grid">
-          <textarea
-            className="fixed-textbox"
-            placeholder="Product About"
-            value={productMeta.About}
-            onChange={(event) => setProductMeta((prev) => ({ ...prev, About: event.target.value }))}
-          />
-          <textarea
-            className="fixed-textbox"
-            placeholder="Detailed Description"
-            value={productMeta.description}
-            onChange={(event) => setProductMeta((prev) => ({ ...prev, description: event.target.value }))}
-          />
-          <input
-            placeholder="Brand"
-            value={productMeta.brand}
-            onChange={(event) => setProductMeta((prev) => ({ ...prev, brand: event.target.value }))}
-          />
-          <input
-            placeholder="Category"
-            value={productMeta.category}
-            onChange={(event) => setProductMeta((prev) => ({ ...prev, category: event.target.value }))}
-          />
-          <button type="button" onClick={handleUpdateProductMeta}>Update Product Details</button>
-        </div>
-      </div>
+          {/* TIER 1: PRODUCT PREVIEW CARD */}
+          <div className="variant-card" style={{ marginBottom: "24px" }}>
+            <div style={{ display: "flex", gap: "20px", alignItems: "flex-start" }}>
+              {product.images && product.images.length > 0 && (
+                <div style={{ flex: "0 0 150px" }}>
+                  <img
+                    src={product.images[0]}
+                    alt={product.About}
+                    style={{ width: "100%", height: "auto", aspectRatio: "1/1", objectFit: "cover", borderRadius: "8px" }}
+                  />
+                </div>
+              )}
+              <div style={{ flex: 1 }}>
+                <h4 style={{ marginTop: 0, marginBottom: "8px" }}>{product.About}</h4>
+                <p style={{ color: "#6b7280", lineHeight: 1.5, marginBottom: 0 }}>{product.brand || "No brand"}</p>
+              </div>
+            </div>
+          </div>
 
-      <div className="variant-card">
-        <div className="content-label">All Variants (Color + Size)</div>
-        <div className="variant-selector-grid">
-          {variants.map((variant) => (
-            <button
-              type="button"
-              key={variant._id}
-              className={`variant-select-card ${selectedVariantId === variant._id ? "active" : ""}`}
-              onClick={() => setSelectedVariantId(variant._id)}
-            >
-              <span className="color-preview" style={{ backgroundColor: getVariantDisplay(variant).colorCode }}></span>
-              <span>{getVariantDisplay(variant).color}</span>
-              <span>•</span>
-              <span>{variant.size}</span>
-            </button>
-          ))}
-        </div>
-      </div>
+          {/* TIER 2: VARIANT LIST GRID */}
+          <div className="variant-card">
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+              <h3 style={{ margin: 0 }}>Available Variants</h3>
+              <span style={{ color: "#6b7280", fontSize: "14px" }}>Click a variant to edit or delete</span>
+            </div>
 
-      <div className="variant-card new-variant">
-        <h4>Create Variant</h4>
-        <p className="muted">Select a standard color name or choose Other Color and provide name + code.</p>
-        <div className="variant-grid">
-          <div>
-            <label className="field-label">Color</label>
-            <div className="color-picker-row">
-              <select value={newVariant.selectedColorName} onChange={(event) => setNewField("selectedColorName", event.target.value)}>
-                {STANDARD_COLORS.map((color) => (
-                  <option key={color.name} value={color.name}>{color.name}</option>
+            {variants.length === 0 ? (
+              <p style={{ color: "#9ca3af", fontStyle: "italic" }}>No variants yet. Add one in a separate section.</p>
+            ) : (
+              <div className="variants-grid">
+                {variants.map((variant) => (
+                  <button
+                    type="button"
+                    key={variant._id}
+                    className="variant-card-selectable"
+                    onClick={() => {
+                      setSelectedVariantId(variant._id);
+                      setIsEditingVariant(true);
+                    }}
+                    style={{ cursor: "pointer" }}
+                  >
+                    {/* Variant Image */}
+                    {variant.images && variant.images.length > 0 && (
+                      <div style={{ marginBottom: "12px" }}>
+                        <img
+                          src={variant.images[0]}
+                          alt={`${getVariantDisplay(variant).color} ${variant.size}`}
+                          style={{
+                            width: "100%",
+                            height: "auto",
+                            aspectRatio: "1/1",
+                            objectFit: "cover",
+                            borderRadius: "6px",
+                            backgroundColor: "#f9fafb"
+                          }}
+                        />
+                      </div>
+                    )}
+
+                    {/* Variant Details */}
+                    <div style={{ display: "flex", gap: "10px", alignItems: "center", marginBottom: "10px" }}>
+                      <span
+                        className="color-preview-large"
+                        style={{ backgroundColor: getVariantDisplay(variant).colorCode, flexShrink: 0 }}
+                      ></span>
+                      <div style={{ flex: 1, textAlign: "left" }}>
+                        <strong style={{ display: "block", fontSize: "14px" }}>{getVariantDisplay(variant).color}</strong>
+                        <span style={{ fontSize: "13px", color: "#6b7280" }}>• {variant.size}</span>
+                      </div>
+                    </div>
+
+                    {/* Variant Pricing & Stock */}
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingTop: "10px", borderTop: "1px solid #f3f4f6", fontSize: "13px" }}>
+                      <span style={{ fontWeight: 600 }}>₹{variant.price}</span>
+                      <span style={{ color: "#6b7280" }}>Stock: {variant.stock}</span>
+                    </div>
+                  </button>
                 ))}
-                <option value={OTHER_COLOR_VALUE}>Other Color</option>
-              </select>
-              <span className="color-preview" style={{ backgroundColor: getColorPayload(newVariant).colorCode }}></span>
-            </div>
-            {newVariant.selectedColorName === OTHER_COLOR_VALUE ? (
-              <div className="grid" style={{ marginTop: "8px" }}>
-                <input
-                  placeholder="Custom color name"
-                  value={newVariant.customColorName}
-                  onChange={(event) => setNewField("customColorName", event.target.value)}
-                />
-                <div className="color-picker-row">
-                  <input
-                    type="color"
-                    value={normalizeColorCode(newVariant.customColorCode)}
-                    onChange={(event) => setNewField("customColorCode", event.target.value)}
-                  />
-                  <input
-                    value={newVariant.customColorCode}
-                    onChange={(event) => setNewField("customColorCode", event.target.value)}
-                    placeholder="#000000"
-                  />
-                </div>
               </div>
-            ) : null}
+            )}
           </div>
-          <div>
-            <label className="field-label">Size</label>
-            <input list="new-variant-sizes" value={newVariant.size} onChange={(event) => setNewField("size", event.target.value)} />
-            <datalist id="new-variant-sizes">
-              {sizeSuggestions.map((size) => <option key={size} value={size} />)}
-            </datalist>
+        </>
+      ) : (
+        // TIER 3: EDIT VARIANT FORM
+        <>
+          <div className="row-actions" style={{ justifyContent: "space-between", marginBottom: "16px" }}>
+            <h3 style={{ margin: 0 }}>
+              Edit Variant: {editVariant ? `${editVariant.selectedColorName === OTHER_COLOR_VALUE ? editVariant.customColorName : editVariant.selectedColorName} • ${editVariant.size}` : ""}
+            </h3>
+            <button type="button" onClick={() => setIsEditingVariant(false)}>Back to Variants</button>
           </div>
-          <div>
-            <label className="field-label">MRP</label>
-            <input type="number" value={newVariant.mrp} onChange={(event) => setNewField("mrp", event.target.value)} />
-          </div>
-          <div>
-            <label className="field-label">Offer Price</label>
-            <input type="number" value={newVariant.price} onChange={(event) => setNewField("price", event.target.value)} />
-          </div>
-          <div>
-            <label className="field-label">Stock</label>
-            <input type="number" value={newVariant.stock} onChange={(event) => setNewField("stock", event.target.value)} />
-          </div>
-        </div>
-        <div className="variant-upload-row">
-          <input
-            type="file"
-            multiple
-            accept="image/*"
-            onChange={async (event) => {
-              const files = Array.from(event.target.files || []);
-              await uploadImagesForForm(files, setNewUploading, setNewVariant);
-              event.target.value = "";
-            }}
-          />
-          <button onClick={handleAddVariant}>Create Variant</button>
-          <span className="muted">{newUploading ? "Uploading..." : "Upload images"}</span>
-        </div>
-        <div className="image-grid">
-          {newVariant.images.map((url, index) => (
-            <div key={`${url}-${index}`} className="image-card">
-              <img src={url} alt={`New Variant ${index + 1}`} />
-              <button className="danger small" onClick={() => removeNewImage(index)}>Remove</button>
-            </div>
-          ))}
-        </div>
-      </div>
 
-      {editVariant ? (
-        <div className="variant-card">
-          <h4>Update / Delete Selected Variant</h4>
-          <div className="variant-grid">
-            <div>
-              <label className="field-label">Color</label>
-              <div className="color-picker-row">
-                <select value={editVariant.selectedColorName} onChange={(event) => setEditField("selectedColorName", event.target.value)}>
-                  {STANDARD_COLORS.map((color) => (
-                    <option key={color.name} value={color.name}>{color.name}</option>
-                  ))}
-                  <option value={OTHER_COLOR_VALUE}>Other Color</option>
-                </select>
-                <span className="color-preview" style={{ backgroundColor: getColorPayload(editVariant).colorCode }}></span>
-              </div>
-              {editVariant.selectedColorName === OTHER_COLOR_VALUE ? (
-                <div className="grid" style={{ marginTop: "8px" }}>
-                  <input
-                    placeholder="Custom color name"
-                    value={editVariant.customColorName}
-                    onChange={(event) => setEditField("customColorName", event.target.value)}
-                  />
+          {editVariant ? (
+            <div className="variant-card">
+              <h4>Update / Delete This Variant</h4>
+              <div className="variant-grid">
+                <div>
+                  <label className="field-label">Color</label>
                   <div className="color-picker-row">
-                    <input
-                      type="color"
-                      value={normalizeColorCode(editVariant.customColorCode)}
-                      onChange={(event) => setEditField("customColorCode", event.target.value)}
-                    />
-                    <input
-                      value={editVariant.customColorCode}
-                      onChange={(event) => setEditField("customColorCode", event.target.value)}
-                      placeholder="#000000"
-                    />
+                    <select value={editVariant.selectedColorName} onChange={(event) => setEditField("selectedColorName", event.target.value)}>
+                      {STANDARD_COLORS.map((color) => (
+                        <option key={color.name} value={color.name}>{color.name}</option>
+                      ))}
+                      <option value={OTHER_COLOR_VALUE}>Other Color</option>
+                    </select>
+                    <span className="color-preview" style={{ backgroundColor: getColorPayload(editVariant).colorCode }}></span>
                   </div>
+                  {editVariant.selectedColorName === OTHER_COLOR_VALUE ? (
+                    <div className="grid" style={{ marginTop: "8px" }}>
+                      <input
+                        placeholder="Custom color name"
+                        value={editVariant.customColorName}
+                        onChange={(event) => setEditField("customColorName", event.target.value)}
+                      />
+                      <div className="color-picker-row">
+                        <input
+                          type="color"
+                          value={normalizeColorCode(editVariant.customColorCode)}
+                          onChange={(event) => setEditField("customColorCode", event.target.value)}
+                        />
+                        <input
+                          value={editVariant.customColorCode}
+                          onChange={(event) => setEditField("customColorCode", event.target.value)}
+                          placeholder="#000000"
+                        />
+                      </div>
+                    </div>
+                  ) : null}
                 </div>
-              ) : null}
-            </div>
-            <div>
-              <label className="field-label">Size</label>
-              <input list="edit-variant-sizes" value={editVariant.size} onChange={(event) => setEditField("size", event.target.value)} />
-              <datalist id="edit-variant-sizes">
-                {sizeSuggestions.map((size) => <option key={size} value={size} />)}
-              </datalist>
-            </div>
-            <div>
-              <label className="field-label">MRP</label>
-              <input type="number" value={editVariant.mrp} onChange={(event) => setEditField("mrp", event.target.value)} />
-            </div>
-            <div>
-              <label className="field-label">Offer Price</label>
-              <input type="number" value={editVariant.price} onChange={(event) => setEditField("price", event.target.value)} />
-            </div>
-            <div>
-              <label className="field-label">Stock</label>
-              <input type="number" value={editVariant.stock} onChange={(event) => setEditField("stock", event.target.value)} />
-            </div>
-          </div>
-
-          <div className="variant-upload-row">
-            <input
-              type="file"
-              multiple
-              accept="image/*"
-              onChange={async (event) => {
-                const files = Array.from(event.target.files || []);
-                await uploadImagesForForm(files, setEditUploading, setEditVariant);
-                event.target.value = "";
-              }}
-            />
-            <button onClick={handleUpdateVariant}>Update Variant</button>
-            <button className="danger" onClick={handleDeleteVariant}>Delete Variant</button>
-            <span className="muted">{editUploading ? "Uploading..." : "Upload images"}</span>
-          </div>
-
-          <div className="image-grid">
-            {(editVariant.images || []).map((url, index) => (
-              <div key={`${url}-${index}`} className="image-card">
-                <img src={url} alt={`Selected Variant ${index + 1}`} />
-                <button className="danger small" onClick={() => removeEditImage(index)}>Remove</button>
+                <div>
+                  <label className="field-label">Size</label>
+                  <input list="edit-variant-sizes" value={editVariant.size} onChange={(event) => setEditField("size", event.target.value)} />
+                  <datalist id="edit-variant-sizes">
+                    {sizeSuggestions.map((size) => <option key={size} value={size} />)}
+                  </datalist>
+                </div>
+                <div>
+                  <label className="field-label">MRP</label>
+                  <input type="number" value={editVariant.mrp} onChange={(event) => setEditField("mrp", event.target.value)} />
+                </div>
+                <div>
+                  <label className="field-label">Offer Price</label>
+                  <input type="number" value={editVariant.price} onChange={(event) => setEditField("price", event.target.value)} />
+                </div>
+                <div>
+                  <label className="field-label">Stock</label>
+                  <input type="number" value={editVariant.stock} onChange={(event) => setEditField("stock", event.target.value)} />
+                </div>
               </div>
-            ))}
-          </div>
-        </div>
-      ) : null}
+
+              <div className="variant-upload-row">
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={async (event) => {
+                    const files = Array.from(event.target.files || []);
+                    await uploadImagesForForm(files, setEditUploading, setEditVariant);
+                    event.target.value = "";
+                  }}
+                />
+                <button onClick={handleUpdateVariant}>Update Variant</button>
+                <button className="danger" onClick={handleDeleteVariant}>Delete Variant</button>
+                <span className="muted">{editUploading ? "Uploading..." : "Upload images"}</span>
+              </div>
+
+              <div className="image-grid">
+                {(editVariant.images || []).map((url, index) => (
+                  <div key={`${url}-${index}`} className="image-card">
+                    <img src={url} alt={`Selected Variant ${index + 1}`} />
+                    <button className="danger small" onClick={() => removeEditImage(index)}>Remove</button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </>
+      )}
     </div>
   );
 }

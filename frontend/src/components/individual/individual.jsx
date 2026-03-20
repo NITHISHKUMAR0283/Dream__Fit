@@ -41,12 +41,12 @@ const Footer = () => (
           <SocialLink
             icon="📸"
             label="Instagram"
-            href="https://instagram.com/riyanshbaba"
+                        href="#"
           />
           <SocialLink
             icon="👍"
             label="Facebook"
-            href="https://facebook.com/riyanshbaba"
+                        href="#"
           />
         </div>
       </div>
@@ -70,10 +70,12 @@ const Footer = () => (
 
 const ProductRecommendationCard = ({ product }) => (
   <Link to={`/product/${product._id}`} className="rec-product-card">
-    <div className="rec-product-image">
+    <div className="rec-product-image-wrap">
       <img src={product.image} alt={product.title} />
     </div>
     <div className="rec-product-info">
+      <p className="rec-brand">{product.brand || "-"}</p>
+            <p className="rec-brand">{product.material || "-"}</p>
       <h4>{product.title}</h4>
       <div className="rec-product-price">
         <span className="rec-price">₹{product.displayPrice || product.minPrice}</span>
@@ -97,6 +99,8 @@ function Individual() {
     const [addedMessage, setAddedMessage] = React.useState("");
     const [recommendations, setRecommendations] = React.useState([]);
     const [recommendationsLoading, setRecommendationsLoading] = React.useState(false);
+    const thumbnailsRef = React.useRef(null);
+    const [currentImageIndex, setCurrentImageIndex] = React.useState(0);
 
     React.useEffect(() => {
         const loadProduct = async () => {
@@ -195,8 +199,35 @@ function Individual() {
     React.useEffect(() => {
         if (displayImages.length && !displayImages.includes(selectedImage)) {
             setSelectedImage(displayImages[0]);
+            setCurrentImageIndex(0);
         }
     }, [displayImages, selectedImage]);
+
+    // Handle thumbnail scroll to change main image
+    React.useEffect(() => {
+        const thumbnailsContainer = thumbnailsRef.current;
+        if (!thumbnailsContainer || !displayImages.length) return;
+
+        const handleScroll = (e) => {
+            const container = e.target;
+            const scrollPosition = container.scrollLeft;
+            const itemWidth = thumbnailsContainer.querySelector('.thumb-btn')?.offsetWidth || 50;
+            const gap = 8;
+            const itemWithGap = itemWidth + gap;
+
+            // Calculate which thumbnail is most visible
+            const newIndex = Math.round(scrollPosition / itemWithGap);
+            const clampedIndex = Math.min(newIndex, displayImages.length - 1);
+
+            if (clampedIndex !== currentImageIndex) {
+                setCurrentImageIndex(clampedIndex);
+                setSelectedImage(displayImages[clampedIndex]);
+            }
+        };
+
+        thumbnailsContainer.addEventListener('scroll', handleScroll);
+        return () => thumbnailsContainer.removeEventListener('scroll', handleScroll);
+    }, [displayImages, currentImageIndex]);
 
     if (loading) {
         return <section className="individual-container not-found">Loading product...</section>;
@@ -226,6 +257,29 @@ function Individual() {
         setTimeout(() => setAddedMessage(""), 1500);
     };
 
+    const handleBuyNow = () => {
+        if (!selectedSize) {
+            alert("Please select a size");
+            return;
+        }
+
+        let message = "🛒 *Order Details*\n\n";
+        message += `1. ${product.title}\n`;
+        message += `   Brand: ${product.brand || "-"}\n`;
+        message += `   Material: ${product.material || "-"}\n`;
+        message += `   Color: ${selectedVariant?.color || "-"}\n`;
+        message += `   Size: ${selectedSize}\n`;
+        message += `   Qty: 1\n`;
+        message += `   Price: ₹${selectedPrice}\n`;
+        message += `   Line Total: ₹${selectedPrice}\n\n`;
+        message += `💰 *Total: ₹${selectedPrice}*`;
+
+        const phone = "918807043986";
+        const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+
+        window.open(url, "_blank", "noopener,noreferrer");
+    };
+
     return (
         <>
         <section className="individual-container">
@@ -235,13 +289,16 @@ function Individual() {
                 </div>
 
                 {!!displayImages.length && (
-                    <div className="individual-thumbnails">
+                    <div className="individual-thumbnails" ref={thumbnailsRef}>
                         {displayImages.map((imageUrl, index) => (
                             <button
                                 type="button"
                                 key={`${imageUrl}-${index}`}
                                 className={`thumb-btn ${currentImage === imageUrl ? "active" : ""}`}
-                                onClick={() => setSelectedImage(imageUrl)}
+                                onClick={() => {
+                                    setSelectedImage(imageUrl);
+                                    setCurrentImageIndex(index);
+                                }}
                             >
                                 <img src={imageUrl} alt={`${product.title} ${index + 1}`} />
                             </button>
@@ -253,7 +310,7 @@ function Individual() {
             <div className="individual-details-card">
                 <div className="individual-details">
                     <p className="breadcrumb">
-                        <Link to="/">Home</Link> / {product.title}
+                        <Link to="/">Home</Link>
                     </p>
 
                     <h1>{product.title}</h1>
@@ -279,6 +336,9 @@ function Individual() {
                         </p>
                         <p>
                             <strong>Category:</strong> {product.category || "N/A"}
+                        </p>
+                        <p>
+                            <strong>Material:</strong> {product.material || "N/A"}
                         </p>
                         <p>
                             <strong>Sizes:</strong> {product.sizes.join(", ") || "N/A"}
@@ -322,6 +382,7 @@ function Individual() {
                                                 const nextImage = nextVariant?.images?.[0]?.url || product.image;
                                                 if (nextImage) {
                                                     setSelectedImage(nextImage);
+                                                    setCurrentImageIndex(0);
                                                 }
                                             }}
                                         ></button>
@@ -352,6 +413,7 @@ function Individual() {
                                             const nextImage = nextVariant?.images?.[0]?.url || product.image;
                                             if (nextImage) {
                                                 setSelectedImage(nextImage);
+                                                setCurrentImageIndex(0);
                                             }
                                         }}
                                     >
@@ -362,16 +424,21 @@ function Individual() {
                         </div>
                     )}
 
-                    <p className="about">{product.description || product.about || "No description available."}</p>
-
                     <div className="action-row">
                         <button type="button" onClick={handleAddToCart}>Add to Cart</button>
-                        <button type="button" className="buy-now">
+                        <button type="button" className="buy-now" onClick={handleBuyNow}>
                             Buy Now
                         </button>
                     </div>
                     {!!addedMessage && <p className="added-message">{addedMessage}</p>}
                 </div>
+            </div>
+        </section>
+
+        <section className="description-section">
+            <div className="description-container">
+                <h3>Product Details</h3>
+                <p className="description-text">{product.description || product.about || "No description available."}</p>
             </div>
         </section>
 

@@ -33,11 +33,12 @@ export const normalizeProduct = (product) => {
 
   return {
     ...product,
-    title: product?.name || product?.title || "Product",
+    title: product?.name || product?.title || product?.About || "",
     about: product?.About || "",
     description: product?.description || "",
     brand: product?.brand || "",
     category: product?.category || "",
+    material: product?.material || "",
     image,
     colors: uniqueValues(variants.map((variant) => variant?.color)),
     sizes: uniqueValues(variants.map((variant) => variant?.size)),
@@ -73,6 +74,10 @@ export const fetchProducts = async (options = {}) => {
 
   if (options.sort) {
     params.set("sort", options.sort);
+  }
+
+  if (options.search && String(options.search).trim()) {
+    params.set("search", String(options.search).trim());
   }
 
   const queryString = params.toString();

@@ -7,6 +7,7 @@ function description({product}){
     return(
         <div>
         <p id="meta">Brand: {product.brand || "-"}</p>
+      <p id="meta">Material: {product.material || "-"}</p>
         <p id ="About">{product.about}</p>
         <p id="meta">{product.sizes.join(", ")}</p>
         <div className="price-row">

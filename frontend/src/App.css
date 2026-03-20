@@ -6,6 +6,12 @@ body,
     margin: 0;
 }
 
+body {
+    font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    color: #111827;
+    background: #ffffff;
+}
+
 .app-shell {
     min-height: 100vh;
     display: flex;
@@ -17,40 +23,46 @@ body,
 }
 
 #Nav-Bar{
+    position: sticky;
+    top: 0;
+    z-index: 20;
     display: flex;
-    flex-direction: row;
-    justify-content:space-between;
-    max-width: 100%;
-    padding: 5px 0;
-    
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 16px;
+    border-bottom: 1px solid #e5e7eb;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: saturate(160%) blur(8px);
 }
+
 #left{
     display: flex;
-    flex-direction: row;
-    align-items:center;
+    align-items: center;
     justify-content: flex-start;
-    
-    flex: 0.7 ;
-    
-    
-    
+    gap: 8px;
+    flex: 0 0 auto;
 }
+
 #left > #CompanyName,
 #left > .nav-link,
 #left > .hide-on-small {
-    padding: 0 1rem;
+    padding: 0 0.55rem;
 }
+
 #left>.my-burger-style{
     width: 20px;
     height: 20px;
-    
 }
 
 .burger-button {
-    border: none;
-    background: transparent;
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    border-radius: 10px;
     padding: 0;
-    margin: 0 6px 0 0;
+    margin: 0;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
@@ -59,48 +71,63 @@ body,
     height: 36px;
     flex: 0 0 36px;
 }
+
+.burger-button:hover {
+    background: #f9fafb;
+    border-color: #d1d5db;
+}
+
 .hide-on-small{
-    margin: 0px;
+    margin: 0;
 }
 
 .nav-link{
-    color: inherit;
+    color: #374151;
     text-decoration: none;
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+.nav-link:hover {
+    color: #111827;
 }
 
 #CompanyName{
     list-style-type:none;
-    font-size: 1.2rem;
+    font-size: 1.1rem;
+    font-weight: 800;
+    letter-spacing: 0.03em;
     white-space: nowrap;
     flex-shrink: 0;
-    color: inherit;
+    color: #111827;
     text-decoration: none;
 }
-.my-burger-style{
-    height: 1.2rem ;
 
-   
+.my-burger-style{
+    height: 1.2rem;
 }
+
 .search_icon{
-    height:0.8rem;
-    width: 0.8rem;
-    min-height: 30px;
-    min-width: 20px;
-    padding: 0 8px;
+    width: 1rem;
+    height: 1rem;
+    min-width: 1rem;
+    color: #6b7280;
+    padding: 0 10px;
 }
+
 #right{
     display: flex;
-    flex-direction: row;
     align-items: center;
-    justify-content: space-between;
-    flex:1;
+    justify-content: flex-end;
+    gap: 10px;
+    flex: 1;
     min-width: 0;
-    
 }
+
 #right>#Search{
-    flex-grow:2;
-    min-width: 25px;
-    
+    flex: 1 1 auto;
+    min-width: 120px;
+    max-width: 640px;
 }
 
 
@@ -111,8 +138,9 @@ body,
 }
 
 .cart-button{
-    border: none;
-    background: transparent;
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    border-radius: 10px;
     position: relative;
     cursor: pointer;
     display: inline-flex;
@@ -120,8 +148,13 @@ body,
     justify-content: center;
     width: 40px;
     height: 40px;
-    margin: 0 10px;
+    margin: 0;
     padding: 0;
+}
+
+.cart-button:hover {
+    background: #f9fafb;
+    border-color: #d1d5db;
 }
 
 .cart-count{
@@ -141,23 +174,36 @@ body,
 
 #Search{
     display: flex;
-    border-radius: 50px;
+    border-radius: 12px;
     overflow: hidden;
-    border: 2px solid black;
-    height: 30px;
+    border: 1px solid #d1d5db;
+    background: #fff;
+    height: 40px;
     align-items: center;
-    
-    max-width: 600px;
 }
+
+#Search:focus-within {
+    border-color: #111827;
+    box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.12);
+}
+
 #Search>#Input{
     width: 100%;
     border: none;
     outline: none;
-    font-size: medium;
+    font-size: 0.94rem;
     height: 100%;
+    color: #111827;
+    background: transparent;
+    padding-right: 12px;
 }
+
+#Search>#Input::placeholder {
+    color: #9ca3af;
+}
+
 .search_icon{
-    height: 1.2rem;
+    height: 1rem;
 }
 
 .menu-overlay {
@@ -199,12 +245,38 @@ body,
 }
 
 @media (max-width:600px){
+    #Nav-Bar {
+        padding: 10px 10px;
+        gap: 8px;
+    }
+
+    #CompanyName {
+        font-size: 1rem;
+    }
+
     .hide-on-small{
         display: none;
-    }         
+    }
+
+    #right>#Search {
+        min-width: 0;
+    }
+
+    #Search {
+        height: 36px;
+    }
+
+    .cart-button,
+    .burger-button {
+        width: 36px;
+        height: 36px;
+    }
 }
+
 @media (max-width:320px){
-    .search_icon{
-        padding: 2px;
+    #left > #CompanyName,
+    #left > .nav-link,
+    #left > .hide-on-small {
+        padding: 0 0.35rem;
     }
 }

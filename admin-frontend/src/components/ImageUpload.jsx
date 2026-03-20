@@ -5,6 +5,8 @@ function ImageUpload({ credentials, images, onImagesChange, maxImages = 5 }) {
   const fileInputRef = useRef(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
+  const [isDragging, setIsDragging] = useState(false);
+  const dragCounter = useRef(0);
 
   const handleSelect = async (event) => {
     const selected = Array.from(event.target.files || []);
@@ -49,19 +51,66 @@ function ImageUpload({ credentials, images, onImagesChange, maxImages = 5 }) {
     onImagesChange(images.filter((_, imageIndex) => imageIndex !== index));
   };
 
+  const handleDragEnter = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounter.current++;
+    if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
+      setIsDragging(true);
+    }
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounter.current--;
+    if (dragCounter.current === 0) {
+      setIsDragging(false);
+    }
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounter.current = 0;
+    setIsDragging(false);
+
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      const syntheticEvent = {
+        target: { files }
+      };
+      handleSelect(syntheticEvent);
+    }
+  };
+
   return (
-    <div className="upload-wrap">
+    <div
+      className={`upload-wrap ${isDragging ? "dragging" : ""}`}
+      onDragEnter={handleDragEnter}
+      onDragLeave={handleDragLeave}
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
+    >
       <label className="field-label">Product Images ({images.length}/{maxImages})</label>
 
       {images.length < maxImages && (
-        <button
-          type="button"
-          className="upload-btn"
-          onClick={() => fileInputRef.current?.click()}
-          disabled={uploading}
-        >
-          {uploading ? "Uploading..." : "Upload from device"}
-        </button>
+        <>
+          <button
+            type="button"
+            className="upload-btn"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+          >
+            {uploading ? "Uploading..." : "Upload from device"}
+          </button>
+          <p className="drag-drop-hint">or drag & drop images here</p>
+        </>
       )}
 
       <input

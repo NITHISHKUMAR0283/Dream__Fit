@@ -46,6 +46,10 @@ const variantSchema = mongoose.Schema({
         type: String,
         default: ""
     },
+   material: {
+        type: String,
+        default: ""
+    },
         primaryImage: {
             url: {
                 type: String,

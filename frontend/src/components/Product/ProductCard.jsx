@@ -4,7 +4,7 @@ const FALLBACK_IMAGE = "https://via.placeholder.com/500x700?text=Product";
 
 function ProductCard({product,onClick}){
     const image = product?.image || FALLBACK_IMAGE;
-    const title = product?.title || "Product";
+    const title = product?.title || product?.about || "";
     const [imgSrc, setImgSrc] = React.useState(image);
 
     React.useEffect(() => {
