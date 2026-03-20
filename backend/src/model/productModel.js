@@ -10,11 +10,6 @@ const variantSchema = mongoose.Schema({
                 type:String,
                 required:true
             },
-            sku: {
-                type: String,
-                required: true,
-                unique: true
-            },
             price:{
                 type:Number,
                 required:true
@@ -31,17 +26,36 @@ const variantSchema = mongoose.Schema({
                 }
         }]
         
-        }
-)
-const productSchema = mongoose.Schema({
+        },
+        { strict: false }
+    )
+    const productSchema = mongoose.Schema({
    About:{
         type:String,
         required:true
     },
-    variant:[variantSchema]
+   description: {
+        type: String,
+        default: ""
+    },
+   brand: {
+        type: String,
+        default: ""
+    },
+   category: {
+        type: String,
+        default: ""
+    },
+        primaryImage: {
+            url: {
+                type: String,
+                required: false
+            }
+        },
+    variants:[variantSchema]
     
     
     
-});
+},{ strict: false });
 module.exports = mongoose.model("Product",productSchema);
 

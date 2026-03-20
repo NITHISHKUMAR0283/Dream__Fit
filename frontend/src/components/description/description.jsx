@@ -1,22 +1,19 @@
 import React from 'react';
 import "../description/description.css"
 function description({product}){
+    const price = product?.displayPrice ?? product?.minPrice;
+    const discountPercent = Number(product?.discountPercent) || 0;
     
     return(
         <div>
-        <p id ="About">{product.About}</p>
-        <div className="rating">
-      <div className="stars-outer">
-        <div
-          className="stars-inner"
-          style={{ width: `${(product.rating / 5) * 100}%` }}
-        ></div>
-            
-        
-      </div>
-      <div id="rating"> {product.rating}/5</div>
-    </div >
-        {<p id="price">₹{product.Price} </p>}</div>
+        <p id="meta">Brand: {product.brand || "-"}</p>
+        <p id ="About">{product.about}</p>
+        <p id="meta">{product.sizes.join(", ")}</p>
+        <div className="price-row">
+          {price !== null && <p id="price">₹{price}</p>}
+          {discountPercent > 0 && <span className="offer-chip">{discountPercent}% OFF</span>}
+        </div>
+        </div>
     )
 }
 export default description;

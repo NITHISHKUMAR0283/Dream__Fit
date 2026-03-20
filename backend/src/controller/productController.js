@@ -1,9 +1,22 @@
 const Product = require("../model/productModel");
 const asyncHandler = require("../middlewares/asyncHandler")
+const {
+  getPublicIdsFromImageEntries,
+  deleteCloudinaryAssets
+} = require("../services/cloudinaryCleanup");
 
 
 const createProduct = asyncHandler(async (req,res)=>{
-    const product = await Product.create(req.body);
+    const payload = { ...req.body };
+    if (payload.variants && Array.isArray(payload.variants)) {
+      payload.variants = payload.variants.map((variant) => {
+        const cloned = { ...variant };
+        delete cloned.sku;
+        return cloned;
+      });
+    }
+
+  const product = await Product.create(payload);
     res.status(201).json({
         message:"product created successfully",
         data : product
@@ -11,7 +24,16 @@ const createProduct = asyncHandler(async (req,res)=>{
 });
 
 const updateProduct = asyncHandler(async (req,res)=>{
-    const product = await Product.findByIdAndUpdate(req.params.id,req.body,{new:true,runValidators:true});
+    const payload = { ...req.body };
+    if (payload.variants && Array.isArray(payload.variants)) {
+      payload.variants = payload.variants.map((variant) => {
+        const cloned = { ...variant };
+        delete cloned.sku;
+        return cloned;
+      });
+    }
+
+  const product = await Product.findByIdAndUpdate(req.params.id,payload,{new:true,runValidators:true});
     if(!product){
         return res.status(404).json({
             message:"cant find the product"
@@ -30,7 +52,17 @@ const getSingleProduct = asyncHandler(async (req, res) => {
     res.status(200).json({ message: "Returning Product", data: product });
 });
 const deleteProduct = asyncHandler(async(req,res)=>{
-    const product = await Product.findByIdAndDelete(req.params.id);
+    const product = await Product.findById(req.params.id);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    const publicIds = (product.variants || [])
+      .flatMap((variant) => getPublicIdsFromImageEntries(variant.images || []));
+
+    await Product.findByIdAndDelete(req.params.id);
+    await deleteCloudinaryAssets(publicIds);
+
     res.status(200).json({
         message:"product deleted successfully",
         data:product
@@ -40,10 +72,18 @@ const deleteProduct = asyncHandler(async(req,res)=>{
 const getProduct = asyncHandler(async (req, res) => {
     const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
     const limit = Math.max(parseInt(req.query.limit, 10) || 10, 1);
+  const sort = req.query.sort;
     const skip = (page - 1) * limit;
 
+  let sortOption = {};
+  if (sort === "latest") {
+    sortOption = { _id: -1 };
+  } else if (sort === "oldest") {
+    sortOption = { _id: 1 };
+  }
+
     const [products, totalProducts] = await Promise.all([
-        Product.find({}).skip(skip).limit(limit),
+    Product.find({}).sort(sortOption).skip(skip).limit(limit),
         Product.countDocuments({})
     ]);
 
@@ -68,7 +108,9 @@ const addVariant = asyncHandler(async (req, res) => {
     return res.status(404).json({ message: "Product not found" });
   }
 
-  product.variants.push(req.body);
+  const variantPayload = { ...req.body };
+  delete variantPayload.sku;
+  product.variants.push(variantPayload);
 
   await product.save();
 
@@ -93,6 +135,7 @@ const updateVariant = asyncHandler(async (req, res) => {
   }
 
   Object.assign(variant, req.body);
+  variant.sku = undefined;
 
   await product.save();
 
@@ -120,9 +163,11 @@ const deleteVariant = asyncHandler(async (req, res) => {
     });
   }
 
+  const publicIds = getPublicIdsFromImageEntries(variant.images || []);
   variant.deleteOne();
 
   await product.save();
+  await deleteCloudinaryAssets(publicIds);
 
   res.status(200).json({
     message: "Variant deleted successfully",

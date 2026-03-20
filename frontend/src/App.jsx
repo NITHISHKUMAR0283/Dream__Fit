@@ -1,19 +1,30 @@
 import React from 'react';
-import {Route,Routes} from 'react-router-dom' ;
-import Home from './components/Home/Home'
+import { Link, Route, Routes, useNavigate } from 'react-router-dom';
+import Product from './components/Product/Product'
 import MenuIcon from './assets/burger-menu.svg?react';
 import Search from './assets/search-button.svg?react';
 import Cart from './assets/shopping-cart.svg?react';
-import Product from './components/individual/individual'
+import IndividualProduct from './components/individual/individual'
+import CartPage from './components/cart/CartPage';
+import Footer from './components/Footer/Footer';
+import { useCart } from './context/CartContext';
 import './App.css'
 function App(){
+    const navigate = useNavigate();
+    const { totalItems } = useCart();
+    const [menuOpen, setMenuOpen] = React.useState(false);
+
+    const closeMenu = () => setMenuOpen(false);
+
     return (
-        <div>
+        <div className="app-shell">
             <nav id="Nav-Bar">
                 <div id="left">
-                    <MenuIcon className= "my-burger-style"/>
-                    <div id = "CompanyName">RIYANSHBABA</div>    
-                    <p className='hide-on-small'>NewArrivals</p>
+                    <button type="button" className="burger-button" onClick={() => setMenuOpen((prev) => !prev)}>
+                        <MenuIcon className= "my-burger-style"/>
+                    </button>
+                    <Link to="/" id = "CompanyName">RIYANSHBABA</Link>
+                    <Link to="/new-arrivals" className='hide-on-small nav-link'>NewArrivals</Link>
                 </div>
                 <div id="right">
                 <div id="Search">
@@ -22,14 +33,31 @@ function App(){
                     <input id="Input" type="text" />
                     
                 </div>
-                <Cart className ="Cart"/>
+                <button type="button" className="cart-button" onClick={() => navigate('/cart')}>
+                    <Cart className ="Cart"/>
+                    {totalItems > 0 && <span className="cart-count">{totalItems}</span>}
+                </button>
                 </div>    
 
             </nav>
-            <Routes>
-                <Route path="/" element={<Home/>}></Route>
-                <Route path="/product/:id" element={<Product/>}></Route> 
-            </Routes>
+
+            {menuOpen && <button type="button" className="menu-overlay" onClick={closeMenu} aria-label="Close menu" />}
+            <aside className={`menu-drawer ${menuOpen ? "open" : ""}`}>
+                <Link to="/" className="menu-link" onClick={closeMenu}>Home</Link>
+                <Link to="/new-arrivals" className="menu-link" onClick={closeMenu}>New Arrivals</Link>
+                <Link to="/cart" className="menu-link" onClick={closeMenu}>Cart</Link>
+            </aside>
+
+            <main className="app-main">
+                <Routes>
+                    <Route path="/" element={<Product/>}></Route>
+                    <Route path="/new-arrivals" element={<Product limit={50} sort="latest"/>}></Route>
+                    <Route path="/product/:id" element={<IndividualProduct/>}></Route> 
+                    <Route path="/cart" element={<CartPage/>}></Route> 
+                </Routes>
+            </main>
+
+            <Footer/>
             </div>
         
             
