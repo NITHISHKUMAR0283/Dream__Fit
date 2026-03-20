@@ -1,7 +1,6 @@
-import { defineConfig } from "vite";
 
+import { defineConfig } from 'vite';
 export default defineConfig({
-  server: {
-    port: 5174
-  }
+  base: '/Riyanshbaba/', // Replace with your repo name
+  // ...other config
 });
