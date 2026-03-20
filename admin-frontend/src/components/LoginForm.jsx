@@ -10,7 +10,15 @@ function LoginForm({ onLogin }) {
       alert("Please enter email and password");
       return;
     }
-    onLogin({ email: email.trim(), password: password.trim() });
+    // Hardcoded login check
+    if (
+      email.trim() === "riyanshbaba@gmial.com" &&
+      password.trim() === "riyanshbaba2026"
+    ) {
+      onLogin({ email: email.trim(), password: password.trim() });
+    } else {
+      alert("Invalid admin credentials");
+    }
   };
 
   return (
