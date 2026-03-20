@@ -65,8 +65,23 @@ function savePropertyCountsCache() {
   } catch {}
 }
 
-export const getProducts = async () => {
-  const payload = await request(PUBLIC_API_BASE_URL);
+export const getProducts = async (options = {}) => {
+  const params = new URLSearchParams();
+  if (options.limit) {
+    params.set("limit", String(options.limit));
+  }
+  if (options.page) {
+    params.set("page", String(options.page));
+  }
+  if (options.sort) {
+    params.set("sort", options.sort);
+  }
+  if (options.search && String(options.search).trim()) {
+    params.set("search", String(options.search).trim());
+  }
+  const queryString = params.toString();
+  const url = queryString ? `${PUBLIC_API_BASE_URL}?${queryString}` : PUBLIC_API_BASE_URL;
+  const payload = await request(url);
   return payload.data || [];
 };
 
