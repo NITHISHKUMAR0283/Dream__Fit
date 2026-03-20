@@ -1,4 +1,4 @@
-# Simple API monitoring middleware for Express
+// Simple API monitoring middleware for Express
 module.exports = function apiMonitor(req, res, next) {
   const start = Date.now();
   res.on('finish', () => {
