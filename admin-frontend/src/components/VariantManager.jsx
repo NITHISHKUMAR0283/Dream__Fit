@@ -23,7 +23,7 @@ const DEFAULT_COLOR_NAME = STANDARD_COLORS[0].name;
 
 const emptyVariant = {
   color: DEFAULT_COLOR,
-  sizes: [],
+  size: "",
   mrp: "",
   price: "",
   stock: "",
@@ -85,7 +85,7 @@ const toNumberOrZero = (value) => {
 
 const mapToPayload = (variant) => ({
   ...getColorPayload(variant),
-  sizes: Array.isArray(variant.sizes) ? variant.sizes : [],
+  size: (variant.size || "").trim(),
   mrp: toNumberOrZero(variant.mrp),
   price: toNumberOrZero(variant.price),
   stock: toNumberOrZero(variant.stock),
@@ -115,7 +115,7 @@ function VariantManager({ product, credentials, onChanged, onBack }) {
     setEditVariant({
       _id: selectedVariant._id,
       ...getVariantColorModel(selectedVariant),
-      sizes: Array.isArray(selectedVariant.sizes) ? selectedVariant.sizes : [],
+      size: selectedVariant.size || "",
       mrp: selectedVariant.mrp?.toString() || "",
       price: selectedVariant.price?.toString() || "",
       stock: selectedVariant.stock?.toString() || "",
@@ -127,24 +127,7 @@ function VariantManager({ product, credentials, onChanged, onBack }) {
     setEditVariant((prev) => ({ ...(prev || {}), [field]: value }));
   };
 
-  // Add size to sizes array
-  const handleAddSize = () => {
-    const size = newSize.trim();
-    if (!size) return;
-    setEditVariant((prev) => ({
-      ...prev,
-      sizes: Array.from(new Set([...(prev.sizes || []), size]))
-    }));
-    setNewSize("");
-  };
-
-  // Remove size from sizes array
-  const handleRemoveSize = (sizeToRemove) => {
-    setEditVariant((prev) => ({
-      ...prev,
-      sizes: (prev.sizes || []).filter((s) => s !== sizeToRemove)
-    }));
-  };
+  // Single size input, no add/remove array logic
 
   const uploadImagesForForm = async (files, setUploading, setter) => {
     if (!files.length) {
@@ -162,8 +145,8 @@ function VariantManager({ product, credentials, onChanged, onBack }) {
   };
 
   const validateVariant = (variant) => {
-    if (!variant.sizes || !variant.sizes.length) {
-      alert("At least one size is required");
+    if (!variant.size || !variant.size.trim()) {
+      alert("Size is required");
       return false;
     }
     if (variant.selectedColorName === OTHER_COLOR_VALUE && !(variant.customColorName || "").trim()) {
@@ -183,10 +166,7 @@ function VariantManager({ product, credentials, onChanged, onBack }) {
     }
 
     // Save sizes array instead of single size
-    await updateVariant(credentials, product._id, editVariant._id, {
-      ...mapToPayload(editVariant),
-      sizes: editVariant.sizes
-    });
+    await updateVariant(credentials, product._id, editVariant._id, mapToPayload(editVariant));
     setIsEditingVariant(false);
     setSelectedVariantId("");
     await onChanged();
@@ -303,7 +283,7 @@ function VariantManager({ product, credentials, onChanged, onBack }) {
                       ></span>
                       <div style={{ flex: 1, textAlign: "left" }}>
                         <strong style={{ display: "block", fontSize: "14px" }}>{getVariantDisplay(variant).color}</strong>
-                        <span style={{ fontSize: "13px", color: "#6b7280" }}>• {Array.isArray(variant.sizes) ? variant.sizes.join(', ') : ''}</span>
+                        <span style={{ fontSize: "13px", color: "#6b7280" }}>• {variant.size}</span>
                       </div>
                     </div>
 
@@ -323,7 +303,7 @@ function VariantManager({ product, credentials, onChanged, onBack }) {
         <>
           <div className="row-actions" style={{ justifyContent: "space-between", marginBottom: "16px" }}>
             <h3 style={{ margin: 0 }}>
-              Edit Variant: {editVariant ? `${editVariant.selectedColorName === OTHER_COLOR_VALUE ? editVariant.customColorName : editVariant.selectedColorName} • ${(editVariant.sizes || []).join(', ')}` : ""}
+              Edit Variant: {editVariant ? `${editVariant.selectedColorName === OTHER_COLOR_VALUE ? editVariant.customColorName : editVariant.selectedColorName} • ${editVariant.size}` : ""}
             </h3>
           </div>
 
@@ -365,27 +345,16 @@ function VariantManager({ product, credentials, onChanged, onBack }) {
                   ) : null}
                 </div>
                 <div>
-                  <label className="field-label">Sizes</label>
-                  <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
-                    <input
-                      list="edit-variant-sizes"
-                      value={newSize}
-                      onChange={(e) => setNewSize(e.target.value)}
-                      placeholder="Add size"
-                    />
-                    <button type="button" onClick={handleAddSize}>Add</button>
-                    <datalist id="edit-variant-sizes">
-                      {sizeSuggestions.map((size) => <option key={size} value={size} />)}
-                    </datalist>
-                  </div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                    {(editVariant.sizes || []).map((size) => (
-                      <span key={size} style={{ background: '#f3f4f6', borderRadius: 4, padding: '2px 8px', marginRight: 4, display: 'flex', alignItems: 'center' }}>
-                        {size}
-                        <button type="button" style={{ marginLeft: 4, color: 'red', background: 'none', border: 'none', cursor: 'pointer' }} onClick={() => handleRemoveSize(size)}>×</button>
-                      </span>
-                    ))}
-                  </div>
+                  <label className="field-label">Size</label>
+                  <input
+                    list="edit-variant-sizes"
+                    value={editVariant.size || ""}
+                    onChange={(e) => setEditField("size", e.target.value)}
+                    placeholder="Enter size"
+                  />
+                  <datalist id="edit-variant-sizes">
+                    {sizeSuggestions.map((size) => <option key={size} value={size} />)}
+                  </datalist>
                 </div>
                 <div>
                   <label className="field-label">MRP</label>

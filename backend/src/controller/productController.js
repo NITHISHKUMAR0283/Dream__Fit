@@ -20,6 +20,11 @@ const createProduct = asyncHandler(async (req,res)=>{
       payload.variants = payload.variants.map((variant) => {
         const cloned = { ...variant };
         delete cloned.sku;
+        // Convert sizes array to single size string if needed
+        if (Array.isArray(cloned.sizes) && cloned.sizes.length > 0) {
+          cloned.size = cloned.sizes[0];
+        }
+        delete cloned.sizes;
         return cloned;
       });
     }
@@ -48,6 +53,11 @@ const updateProduct = asyncHandler(async (req,res)=>{
       payload.variants = payload.variants.map((variant) => {
         const cloned = { ...variant };
         delete cloned.sku;
+        // Convert sizes array to single size string if needed
+        if (Array.isArray(cloned.sizes) && cloned.sizes.length > 0) {
+          cloned.size = cloned.sizes[0];
+        }
+        delete cloned.sizes;
         return cloned;
       });
     }
@@ -256,14 +266,7 @@ const getVariant = asyncHandler(async (req, res) => {
 
   const variant = product.variants.find(
     v => v.color === color && v.size === size
-  // If sizes array is present, remove single size field
-  if (Array.isArray(variantPayload.sizes) && variantPayload.sizes.length > 0) {
-    delete variantPayload.size;
-  } else if (variantPayload.size) {
-    // If only size is present, convert to sizes array
-    variantPayload.sizes = [variantPayload.size];
-  }
-  product.variants.push(variantPayload);
+  );
 
   if (!variant) {
     return res.status(404).json({ message: "Variant not found" });
