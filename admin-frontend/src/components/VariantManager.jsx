@@ -97,6 +97,7 @@ function VariantManager({ product, credentials, onChanged, onBack }) {
   const [selectedVariantId, setSelectedVariantId] = useState("");
   const [isEditingVariant, setIsEditingVariant] = useState(false);
   const [editVariant, setEditVariant] = useState(null);
+  const [newSize, setNewSize] = useState("");
   const [editUploading, setEditUploading] = useState(false);
 
   React.useEffect(() => {
@@ -114,7 +115,7 @@ function VariantManager({ product, credentials, onChanged, onBack }) {
     setEditVariant({
       _id: selectedVariant._id,
       ...getVariantColorModel(selectedVariant),
-      size: selectedVariant.size || "",
+      sizes: Array.isArray(selectedVariant.sizes) ? selectedVariant.sizes : (selectedVariant.size ? [selectedVariant.size] : []),
       mrp: selectedVariant.mrp?.toString() || "",
       price: selectedVariant.price?.toString() || "",
       stock: selectedVariant.stock?.toString() || "",
@@ -124,6 +125,25 @@ function VariantManager({ product, credentials, onChanged, onBack }) {
 
   const setEditField = (field, value) => {
     setEditVariant((prev) => ({ ...(prev || {}), [field]: value }));
+  };
+
+  // Add size to sizes array
+  const handleAddSize = () => {
+    const size = newSize.trim();
+    if (!size) return;
+    setEditVariant((prev) => ({
+      ...prev,
+      sizes: Array.from(new Set([...(prev.sizes || []), size]))
+    }));
+    setNewSize("");
+  };
+
+  // Remove size from sizes array
+  const handleRemoveSize = (sizeToRemove) => {
+    setEditVariant((prev) => ({
+      ...prev,
+      sizes: (prev.sizes || []).filter((s) => s !== sizeToRemove)
+    }));
   };
 
   const uploadImagesForForm = async (files, setUploading, setter) => {
@@ -142,16 +162,14 @@ function VariantManager({ product, credentials, onChanged, onBack }) {
   };
 
   const validateVariant = (variant) => {
-    if (!variant.size?.trim()) {
-      alert("Color and Size are required");
+    if (!variant.sizes || !variant.sizes.length) {
+      alert("At least one size is required");
       return false;
     }
-
     if (variant.selectedColorName === OTHER_COLOR_VALUE && !(variant.customColorName || "").trim()) {
       alert("Custom color name is required");
       return false;
     }
-
     if (!variant.mrp || !variant.price) {
       alert("MRP and Offer Price are required");
       return false;
@@ -164,7 +182,11 @@ function VariantManager({ product, credentials, onChanged, onBack }) {
       return;
     }
 
-    await updateVariant(credentials, product._id, editVariant._id, mapToPayload(editVariant));
+    // Save sizes array instead of single size
+    await updateVariant(credentials, product._id, editVariant._id, {
+      ...mapToPayload(editVariant),
+      sizes: editVariant.sizes
+    });
     setIsEditingVariant(false);
     setSelectedVariantId("");
     await onChanged();
@@ -343,11 +365,27 @@ function VariantManager({ product, credentials, onChanged, onBack }) {
                   ) : null}
                 </div>
                 <div>
-                  <label className="field-label">Size</label>
-                  <input list="edit-variant-sizes" value={editVariant.size} onChange={(event) => setEditField("size", event.target.value)} />
-                  <datalist id="edit-variant-sizes">
-                    {sizeSuggestions.map((size) => <option key={size} value={size} />)}
-                  </datalist>
+                  <label className="field-label">Sizes</label>
+                  <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+                    <input
+                      list="edit-variant-sizes"
+                      value={newSize}
+                      onChange={(e) => setNewSize(e.target.value)}
+                      placeholder="Add size"
+                    />
+                    <button type="button" onClick={handleAddSize}>Add</button>
+                    <datalist id="edit-variant-sizes">
+                      {sizeSuggestions.map((size) => <option key={size} value={size} />)}
+                    </datalist>
+                  </div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                    {(editVariant.sizes || []).map((size) => (
+                      <span key={size} style={{ background: '#f3f4f6', borderRadius: 4, padding: '2px 8px', marginRight: 4, display: 'flex', alignItems: 'center' }}>
+                        {size}
+                        <button type="button" style={{ marginLeft: 4, color: 'red', background: 'none', border: 'none', cursor: 'pointer' }} onClick={() => handleRemoveSize(size)}>×</button>
+                      </span>
+                    ))}
+                  </div>
                 </div>
                 <div>
                   <label className="field-label">MRP</label>

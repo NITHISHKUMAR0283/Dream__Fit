@@ -164,21 +164,28 @@ function Individual() {
         return Object.values(colorMap);
     }, [variants]);
 
-    // Build size options for selected color
+
+    // Build size options for selected color (from sizes array)
     const sizeOptions = React.useMemo(() => {
-        return Array.from(
-            new Set(
-                variants
-                    .filter((variant) => normalizeColorKey(variant?.color) === selectedColor)
-                    .map((variant) => variant?.size)
-                    .filter(Boolean)
-            )
-        );
+        const sizesSet = new Set();
+        variants
+            .filter((variant) => normalizeColorKey(variant?.color) === selectedColor)
+            .forEach((variant) => {
+                if (Array.isArray(variant.sizes)) {
+                    variant.sizes.forEach((s) => s && sizesSet.add(s));
+                } else if (variant.size) {
+                    sizesSet.add(variant.size);
+                }
+            });
+        return Array.from(sizesSet);
     }, [variants, selectedColor]);
 
+    // Find the variant for selected color and size (from sizes array)
     const selectedVariant =
         variants.find(
-            (variant) => normalizeColorKey(variant?.color) === selectedColor && variant?.size === selectedSize
+            (variant) => normalizeColorKey(variant?.color) === selectedColor && (
+                (Array.isArray(variant.sizes) && variant.sizes.includes(selectedSize)) || variant.size === selectedSize
+            )
         ) || variants[0];
 
     const selectedVariantStock = Number(selectedVariant?.stock) || 0;
@@ -376,18 +383,26 @@ function Individual() {
                                                 const nextColor = colorKey;
                                                 setSelectedColor(nextColor);
 
-                                                const nextSize = (product.variants || []).find(
+                                                // Find first available size for this color
+                                                let nextSize = "";
+                                                const colorVariants = (product.variants || []).filter(
                                                     (variant) => normalizeColorKey(variant?.color) === nextColor
-                                                )?.size;
-
+                                                );
+                                                if (colorVariants.length) {
+                                                    // Prefer first size in sizes array
+                                                    const v = colorVariants[0];
+                                                    if (Array.isArray(v.sizes) && v.sizes.length > 0) {
+                                                        nextSize = v.sizes[0];
+                                                    } else if (v.size) {
+                                                        nextSize = v.size;
+                                                    }
+                                                }
                                                 if (nextSize) {
                                                     setSelectedSize(nextSize);
                                                 }
-
-                                                const nextVariant = (product.variants || []).find(
-                                                    (variant) => normalizeColorKey(variant?.color) === nextColor && variant?.size === nextSize
-                                                ) || (product.variants || []).find((variant) => normalizeColorKey(variant?.color) === nextColor);
-
+                                                const nextVariant = colorVariants.find(
+                                                    (variant) => (Array.isArray(variant.sizes) && variant.sizes.includes(nextSize)) || variant.size === nextSize
+                                                ) || colorVariants[0];
                                                 const nextImage = nextVariant?.images?.[0]?.url || product.image;
                                                 if (nextImage) {
                                                     setSelectedImage(nextImage);
@@ -416,9 +431,10 @@ function Individual() {
                                             setSelectedSize(nextSize);
 
                                             const nextVariant = (product.variants || []).find(
-                                                (variant) => normalizeColorKey(variant?.color) === selectedColor && variant?.size === nextSize
+                                                (variant) => normalizeColorKey(variant?.color) === selectedColor && (
+                                                    (Array.isArray(variant.sizes) && variant.sizes.includes(nextSize)) || variant.size === nextSize
+                                                )
                                             );
-
                                             const nextImage = nextVariant?.images?.[0]?.url || product.image;
                                             if (nextImage) {
                                                 setSelectedImage(nextImage);

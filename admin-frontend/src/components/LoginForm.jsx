@@ -1,24 +1,15 @@
 import React, { useState } from "react";
 
+
 function LoginForm({ onLogin }) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  // Hardcoded admin credentials
+  const email = "nk0283@srmist.edu.in";
+  const password = "ASNRnithishjee@gmail.com";
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    if (!email.trim() || !password.trim()) {
-      alert("Please enter email and password");
-      return;
-    }
-    // Hardcoded login check
-    if (
-      email.trim() === "riyanshbaba@gmail.com" &&
-      password.trim() === "riyanshbaba2026"
-    ) {
-      onLogin({ email: email.trim(), password: password.trim() });
-    } else {
-      alert("Invalid admin credentials");
-    }
+    // Always succeed with hardcoded credentials
+    onLogin({ email, password });
   };
 
   return (
@@ -29,13 +20,13 @@ function LoginForm({ onLogin }) {
         <input
           placeholder="Admin email"
           value={email}
-          onChange={(event) => setEmail(event.target.value)}
+          disabled
         />
         <input
           type="password"
           placeholder="Admin password"
           value={password}
-          onChange={(event) => setPassword(event.target.value)}
+          disabled
         />
         <button type="submit">Continue</button>
       </form>

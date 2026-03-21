@@ -73,8 +73,8 @@ function ProductManager({ products, credentials, onChanged }) {
     selectedColorName: DEFAULT_COLOR_NAME,
     customColorName: "",
     customColorCode: DEFAULT_COLOR,
-    sizeSelection: "",
-    customSize: "",
+    sizes: [],
+    sizeInput: "",
     mrp: "",
     price: "",
     stock: "",
@@ -99,8 +99,8 @@ function ProductManager({ products, credentials, onChanged }) {
     selectedColorName: DEFAULT_COLOR_NAME,
     customColorName: "",
     customColorCode: DEFAULT_COLOR,
-    sizeSelection: "",
-    customSize: "",
+    sizes: [],
+    sizeInput: "",
     mrp: "",
     price: "",
     stock: "",
@@ -379,9 +379,8 @@ function ProductManager({ products, credentials, onChanged }) {
       alert("Primary image is required");
       return;
     }
-    const resolvedSize = resolveSizeValue(newVariant.sizeSelection, newVariant.customSize);
-    if (!resolvedSize) {
-      alert("Size is required for first variant");
+    if (!newVariant.sizes || !newVariant.sizes.length) {
+      alert("At least one size is required for first variant");
       return;
     }
     if (newVariant.selectedColorName === OTHER_COLOR_VALUE && !(newVariant.customColorName || "").trim()) {
@@ -412,7 +411,7 @@ function ProductManager({ products, credentials, onChanged }) {
         {
           color: colorPayload.color,
           colorCode: colorPayload.colorCode,
-          size: resolvedSize,
+          sizes: newVariant.sizes,
           mrp: toNumberOrZero(newVariant.mrp),
           price: toNumberOrZero(newVariant.price),
           stock: toNumberOrZero(newVariant.stock),
@@ -435,8 +434,8 @@ function ProductManager({ products, credentials, onChanged }) {
       selectedColorName: DEFAULT_COLOR_NAME,
       customColorName: "",
       customColorCode: DEFAULT_COLOR,
-      sizeSelection: "",
-      customSize: "",
+      sizes: [],
+      sizeInput: "",
       mrp: "",
       price: "",
       stock: "",
@@ -481,8 +480,8 @@ function ProductManager({ products, credentials, onChanged }) {
   // ===== VARIANT CRUD =====
   const handleCreateVariant = async () => {
     if (!selectedProduct) return;
-    if (!variantToCreate.size.trim()) {
-      alert("Size is required");
+    if (!variantToCreate.sizes || !variantToCreate.sizes.length) {
+      alert("At least one size is required");
       return;
     }
     if (variantToCreate.selectedColorName === OTHER_COLOR_VALUE && !(variantToCreate.customColorName || "").trim()) {
@@ -502,7 +501,7 @@ function ProductManager({ products, credentials, onChanged }) {
     await addVariant(credentials, selectedProduct._id, {
       color: colorPayload.color,
       colorCode: colorPayload.colorCode,
-      size: variantToCreate.size.trim(),
+      sizes: variantToCreate.sizes,
       mrp: toNumberOrZero(variantToCreate.mrp),
       price: toNumberOrZero(variantToCreate.price),
       stock: toNumberOrZero(variantToCreate.stock),
@@ -513,7 +512,8 @@ function ProductManager({ products, credentials, onChanged }) {
       selectedColorName: DEFAULT_COLOR_NAME,
       customColorName: "",
       customColorCode: DEFAULT_COLOR,
-      size: "",
+      sizes: [],
+      sizeInput: "",
       mrp: "",
       price: "",
       stock: "",
@@ -900,8 +900,32 @@ function ProductManager({ products, credentials, onChanged }) {
                       )}
                     </div>
                     <div>
-                      <label className="field-label">Size</label>
-                      <input list="size-list" placeholder="M / 42 / 1L" value={newVariant.size} onChange={(e) => setNewVariant((prev) => ({ ...prev, size: e.target.value }))} />
+                      <label className="field-label">Sizes</label>
+                      <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+                        <input
+                          list="size-list"
+                          placeholder="Add size"
+                          value={newVariant.sizeInput}
+                          onChange={(e) => setNewVariant((prev) => ({ ...prev, sizeInput: e.target.value }))}
+                        />
+                        <button type="button" onClick={() => {
+                          const size = newVariant.sizeInput.trim();
+                          if (!size) return;
+                          setNewVariant((prev) => ({
+                            ...prev,
+                            sizes: Array.from(new Set([...(prev.sizes || []), size])),
+                            sizeInput: ""
+                          }));
+                        }}>Add</button>
+                      </div>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                        {(newVariant.sizes || []).map((size) => (
+                          <span key={size} style={{ background: '#f3f4f6', borderRadius: 4, padding: '2px 8px', marginRight: 4, display: 'flex', alignItems: 'center' }}>
+                            {size}
+                            <button type="button" style={{ marginLeft: 4, color: 'red', background: 'none', border: 'none', cursor: 'pointer' }} onClick={() => setNewVariant((prev) => ({ ...prev, sizes: (prev.sizes || []).filter((s) => s !== size) }))}>×</button>
+                          </span>
+                        ))}
+                      </div>
                       <datalist id="size-list">
                         {SIZE_SUGGESTIONS.map((size) => <option key={size} value={size} />)}
                       </datalist>
@@ -1129,8 +1153,32 @@ function ProductManager({ products, credentials, onChanged }) {
                     )}
                   </div>
                   <div>
-                    <label className="field-label">Size</label>
-                    <input list="size-list-2" placeholder="M / 42 / 1L" value={variantToCreate.size} onChange={(e) => setVariantToCreate((prev) => ({ ...prev, size: e.target.value }))} />
+                    <label className="field-label">Sizes</label>
+                    <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+                      <input
+                        list="size-list-2"
+                        placeholder="Add size"
+                        value={variantToCreate.sizeInput}
+                        onChange={(e) => setVariantToCreate((prev) => ({ ...prev, sizeInput: e.target.value }))}
+                      />
+                      <button type="button" onClick={() => {
+                        const size = variantToCreate.sizeInput.trim();
+                        if (!size) return;
+                        setVariantToCreate((prev) => ({
+                          ...prev,
+                          sizes: Array.from(new Set([...(prev.sizes || []), size])),
+                          sizeInput: ""
+                        }));
+                      }}>Add</button>
+                    </div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                      {(variantToCreate.sizes || []).map((size) => (
+                        <span key={size} style={{ background: '#f3f4f6', borderRadius: 4, padding: '2px 8px', marginRight: 4, display: 'flex', alignItems: 'center' }}>
+                          {size}
+                          <button type="button" style={{ marginLeft: 4, color: 'red', background: 'none', border: 'none', cursor: 'pointer' }} onClick={() => setVariantToCreate((prev) => ({ ...prev, sizes: (prev.sizes || []).filter((s) => s !== size) }))}>×</button>
+                        </span>
+                      ))}
+                    </div>
                     <datalist id="size-list-2">
                       {SIZE_SUGGESTIONS.map((size) => <option key={size} value={size} />)}
                     </datalist>

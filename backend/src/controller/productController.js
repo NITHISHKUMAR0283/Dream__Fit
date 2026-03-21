@@ -256,7 +256,14 @@ const getVariant = asyncHandler(async (req, res) => {
 
   const variant = product.variants.find(
     v => v.color === color && v.size === size
-  );
+  // If sizes array is present, remove single size field
+  if (Array.isArray(variantPayload.sizes) && variantPayload.sizes.length > 0) {
+    delete variantPayload.size;
+  } else if (variantPayload.size) {
+    // If only size is present, convert to sizes array
+    variantPayload.sizes = [variantPayload.size];
+  }
+  product.variants.push(variantPayload);
 
   if (!variant) {
     return res.status(404).json({ message: "Variant not found" });
