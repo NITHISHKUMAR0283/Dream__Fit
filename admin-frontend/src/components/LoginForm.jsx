@@ -12,7 +12,7 @@ function LoginForm({ onLogin }) {
     }
     // Hardcoded login check
     if (
-      email.trim() === "riyanshbaba@gmial.com" &&
+      email.trim() === "riyanshbaba@gmail.com" &&
       password.trim() === "riyanshbaba2026"
     ) {
       onLogin({ email: email.trim(), password: password.trim() });
