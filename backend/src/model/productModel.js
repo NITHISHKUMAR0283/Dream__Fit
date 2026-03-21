@@ -11,10 +11,6 @@ const variantSchema = mongoose.Schema({
                 required: false,
                 default: []
             },
-            size: {
-                type: String,
-                required: false
-            },
             price:{
                 type:Number,
                 required:true

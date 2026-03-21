@@ -23,7 +23,7 @@ const DEFAULT_COLOR_NAME = STANDARD_COLORS[0].name;
 
 const emptyVariant = {
   color: DEFAULT_COLOR,
-  size: "",
+  sizes: [],
   mrp: "",
   price: "",
   stock: "",
@@ -85,7 +85,7 @@ const toNumberOrZero = (value) => {
 
 const mapToPayload = (variant) => ({
   ...getColorPayload(variant),
-  size: variant.size.trim(),
+  sizes: Array.isArray(variant.sizes) ? variant.sizes : [],
   mrp: toNumberOrZero(variant.mrp),
   price: toNumberOrZero(variant.price),
   stock: toNumberOrZero(variant.stock),
@@ -115,7 +115,7 @@ function VariantManager({ product, credentials, onChanged, onBack }) {
     setEditVariant({
       _id: selectedVariant._id,
       ...getVariantColorModel(selectedVariant),
-      sizes: Array.isArray(selectedVariant.sizes) ? selectedVariant.sizes : (selectedVariant.size ? [selectedVariant.size] : []),
+      sizes: Array.isArray(selectedVariant.sizes) ? selectedVariant.sizes : [],
       mrp: selectedVariant.mrp?.toString() || "",
       price: selectedVariant.price?.toString() || "",
       stock: selectedVariant.stock?.toString() || "",
@@ -303,7 +303,7 @@ function VariantManager({ product, credentials, onChanged, onBack }) {
                       ></span>
                       <div style={{ flex: 1, textAlign: "left" }}>
                         <strong style={{ display: "block", fontSize: "14px" }}>{getVariantDisplay(variant).color}</strong>
-                        <span style={{ fontSize: "13px", color: "#6b7280" }}>• {variant.size}</span>
+                        <span style={{ fontSize: "13px", color: "#6b7280" }}>• {Array.isArray(variant.sizes) ? variant.sizes.join(', ') : ''}</span>
                       </div>
                     </div>
 
@@ -323,7 +323,7 @@ function VariantManager({ product, credentials, onChanged, onBack }) {
         <>
           <div className="row-actions" style={{ justifyContent: "space-between", marginBottom: "16px" }}>
             <h3 style={{ margin: 0 }}>
-              Edit Variant: {editVariant ? `${editVariant.selectedColorName === OTHER_COLOR_VALUE ? editVariant.customColorName : editVariant.selectedColorName} • ${editVariant.size}` : ""}
+              Edit Variant: {editVariant ? `${editVariant.selectedColorName === OTHER_COLOR_VALUE ? editVariant.customColorName : editVariant.selectedColorName} • ${(editVariant.sizes || []).join(', ')}` : ""}
             </h3>
           </div>
 
