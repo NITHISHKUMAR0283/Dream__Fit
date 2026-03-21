@@ -405,7 +405,8 @@ html, body {
   .individual-container {
     grid-template-columns: 1fr;
     gap: 18px;
-    padding: 16px 10px 100px;
+    padding: 16px 10px 16px;
+    min-height: 0;
   }
 
   .individual-media-col {
@@ -536,6 +537,7 @@ html, body {
     background: white;
     border-top: 1px solid #e5e7eb;
     z-index: 50;
+    box-shadow: 0 -2px 12px rgba(0,0,0,0.04);
   }
 
   .action-row button {

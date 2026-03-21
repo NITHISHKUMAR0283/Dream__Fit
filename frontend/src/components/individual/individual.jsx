@@ -146,31 +146,35 @@ function Individual() {
     const variants = product?.variants || [];
     const hasRange = product?.minPrice !== null && product?.maxPrice !== null && product?.minPrice !== product?.maxPrice;
 
-    const [brandOptions, setBrandOptions] = React.useState([]);
-    const [materialOptions, setMaterialOptions] = React.useState([]);
-    const [categoryOptions, setCategoryOptions] = React.useState([]);
-    const [colorOptions, setColorOptions] = React.useState([]);
 
-    React.useEffect(() => {
-        async function loadPropertyCounts() {
-            setBrandOptions(Object.keys(await fetchPropertyCounts('brand')));
-            setMaterialOptions(Object.keys(await fetchPropertyCounts('material')));
-            setCategoryOptions(Object.keys(await fetchPropertyCounts('category')));
-            setColorOptions(Object.keys(await fetchPropertyCounts('color')));
-        }
-        loadPropertyCounts();
-    }, []);
+    // Build color options from variants
+    const colorOptions = React.useMemo(() => {
+        const colorMap = {};
+        variants.forEach((variant) => {
+            const colorKey = normalizeColorKey(variant.color);
+            if (!colorKey) return;
+            if (!colorMap[colorKey]) {
+                colorMap[colorKey] = {
+                    colorKey,
+                    colorName: variant.color,
+                    colorCode: variant.colorCode || variant.color || '#d1d5db',
+                };
+            }
+        });
+        return Object.values(colorMap);
+    }, [variants]);
 
-    const colorOptionsForDropdown = colorOptions.filter((color) => color !== "");
-
-    const sizeOptions = Array.from(
-        new Set(
-            variants
-                .filter((variant) => !selectedColor || normalizeColorKey(variant?.color) === selectedColor)
-                .map((variant) => variant?.size)
-                .filter(Boolean)
-        )
-    );
+    // Build size options for selected color
+    const sizeOptions = React.useMemo(() => {
+        return Array.from(
+            new Set(
+                variants
+                    .filter((variant) => normalizeColorKey(variant?.color) === selectedColor)
+                    .map((variant) => variant?.size)
+                    .filter(Boolean)
+            )
+        );
+    }, [variants, selectedColor]);
 
     const selectedVariant =
         variants.find(

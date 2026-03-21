@@ -1,3 +1,8 @@
+@media (max-width:600px){
+    .cart-button {
+        display: none !important;
+    }
+}
 
 html,
 body,
