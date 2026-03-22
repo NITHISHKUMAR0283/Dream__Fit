@@ -48,37 +48,42 @@ body {
   grid-template-columns: 280px minmax(0, 1fr);
 }
 
+
 .admin-sidebar {
   position: sticky;
   top: 0;
   height: 100vh;
   padding: 24px 18px;
   color: #fff;
-  background: #000;
-  border-right: 1px solid #222;
+  background: linear-gradient(135deg, #f9a8d4 0%, #ec4899 100%);
+  border-right: 1px solid #ec4899;
 }
 
 .sidebar-brand {
-  display: grid;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   gap: 8px;
   padding-bottom: 20px;
   margin-bottom: 18px;
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid #f472b6;
 }
 
 .brand {
   font-weight: 700;
   letter-spacing: 0.6px;
-  color: #fff;
+  color: #ec4899;
+  font-size: 1.5rem;
 }
 
 .tag {
   width: fit-content;
-  border: 1px solid #fff;
+  border: 1px solid #ec4899;
   border-radius: 999px;
   padding: 4px 10px;
   font-size: 11px;
-  color: #fff;
+  color: #ec4899;
+  background: #fff;
 }
 
 .sidebar-section {

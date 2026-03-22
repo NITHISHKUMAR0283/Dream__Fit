@@ -1,3 +1,4 @@
+import dreamfitLogo from "./dreamfit-logo.svg";
 import React, { useEffect, useState } from "react";
 import LoginForm from "./components/LoginForm";
 import ProductManager from "./components/ProductManager";
@@ -48,8 +49,9 @@ function App() {
       {credentials ? (
         <aside className="admin-sidebar">
           <div className="sidebar-brand">
-            <div className="brand">RIYANSHBABA</div>
-            <span className="tag">Commerce Admin</span>
+            <img src={dreamfitLogo} alt="DreamFit Logo" style={{ width: 120, height: 40, marginBottom: 8 }} />
+            <div className="brand" style={{ color: "#ec4899" }}>DreamFit</div>
+            <span className="tag" style={{ borderColor: "#ec4899", color: "#ec4899" }}>Admin Panel</span>
           </div>
 
           <div className="sidebar-section">
