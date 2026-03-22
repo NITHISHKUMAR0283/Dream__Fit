@@ -18,9 +18,9 @@ const Footer = () => (
   <footer className="app-footer">
     <div className="footer-content">
       <div className="footer-section">
-        <h3>About Riyanshbaba</h3>
+        <h3>About DreamFit</h3>
         <p>
-          Riyanshbaba is your trusted ecommerce destination for quality products. We bring you a curated selection of items with exceptional service, fast delivery, and customer-first approach. Our mission is to make online shopping convenient, affordable, and enjoyable.
+          DreamFit is your trusted destination for premium fitness and lifestyle products. We bring you a curated selection with exceptional service, fast delivery, and a customer-first approach. Our mission is to make online shopping convenient, affordable, and inspiring for your fitness journey.
         </p>
       </div>
 
@@ -69,7 +69,7 @@ const Footer = () => (
     </div>
 
     <div className="footer-bottom">
-      <p>&copy; 2026 Riyanshbaba. All rights reserved.</p>
+      <p>&copy; 2026 DreamFit. All rights reserved.</p>
     </div>
   </footer>
 );

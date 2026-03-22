@@ -21,51 +21,51 @@ const SocialLink = ({ icon, label, href }) => (
 );
 
 const Footer = () => (
-  <footer className="individual-footer">
-    <div className="footer-content">
-      <div className="footer-section">
-        <h3>About Riyanshbaba</h3>
-        <p>
-          Riyanshbaba is your trusted ecommerce destination for quality products. We bring you a curated selection of items with exceptional service, fast delivery, and customer-first approach. Our mission is to make online shopping convenient, affordable, and enjoyable.
-        </p>
-      </div>
+    <footer className="individual-footer">
+        <div className="footer-content">
+            <div className="footer-section">
+                <h3>About DreamFit</h3>
+                <p>
+                    DreamFit is your trusted destination for premium fitness and lifestyle products. We bring you a curated selection with exceptional service, fast delivery, and a customer-first approach. Our mission is to make online shopping convenient, affordable, and inspiring for your fitness journey.
+                </p>
+            </div>
 
-      <div className="footer-section">
-        <h3>Follow Us</h3>
-        <div className="social-links">
-          <SocialLink
-            icon="📱"
-            label="WhatsApp"
-            href="https://wa.me/919999999999"
-          />
-          <SocialLink
-            icon="📸"
-            label="Instagram"
+            <div className="footer-section">
+                <h3>Follow Us</h3>
+                <div className="social-links">
+                    <SocialLink
+                        icon="📱"
+                        label="WhatsApp"
+                        href="https://wa.me/919999999999"
+                    />
+                    <SocialLink
+                        icon="📸"
+                        label="Instagram"
                         href="#"
-          />
-          <SocialLink
-            icon="👍"
-            label="Facebook"
+                    />
+                    <SocialLink
+                        icon="👍"
+                        label="Facebook"
                         href="#"
-          />
+                    />
+                </div>
+            </div>
+
+            <div className="footer-section">
+                <h3>Why Choose Us?</h3>
+                <ul>
+                    <li>✓ Premium Quality Products</li>
+                    <li>✓ Fast & Free Shipping</li>
+                    <li>✓ Easy Returns & Exchanges</li>
+                    <li>✓ 24/7 Customer Support</li>
+                </ul>
+            </div>
         </div>
-      </div>
 
-      <div className="footer-section">
-        <h3>Why Choose Us?</h3>
-        <ul>
-          <li>✓ Premium Quality Products</li>
-          <li>✓ Fast & Free Shipping</li>
-          <li>✓ Easy Returns & Exchanges</li>
-          <li>✓ 24/7 Customer Support</li>
-        </ul>
-      </div>
-    </div>
-
-    <div className="footer-bottom">
-      <p>&copy; 2026 Riyanshbaba. All rights reserved.</p>
-    </div>
-  </footer>
+        <div className="footer-bottom">
+            <p>&copy; 2026 DreamFit. All rights reserved.</p>
+        </div>
+    </footer>
 );
 
 const ProductRecommendationCard = ({ product }) => (
@@ -261,39 +261,10 @@ function Individual() {
         );
     }
 
-    const handleAddToCart = () => {
-        addToCart(product, {
-            color: selectedVariant?.color || selectedColor,
-            size: selectedSize
-        });
 
-        setAddedMessage("Added to cart");
-        setTimeout(() => setAddedMessage(""), 1500);
-    };
-
+    // Buy Now button is now inert (no functionality)
     const handleBuyNow = () => {
-        if (!selectedSize) {
-            alert("Please select a size");
-            return;
-        }
-
-        let message = "🛒 *Order Details*\n\n";
-        message += `ProductID: ${product._id}\n`;
-        message += `Title: ${product.title}\n`;
-        message += `Brand: ${product.brand || "-"}\n`;
-        message += `Material: ${product.material || "-"}\n`;
-        message += `Category: ${product.category || "-"}\n`;
-        message += `Color: ${selectedVariant?.color || "-"}\n`;
-        message += `Size: ${selectedSize}\n`;
-        message += `Qty: 1\n`;
-        message += `Price: ₹${selectedPrice}\n`;
-        message += `LineTotal: ₹${selectedPrice}\n`;
-        message += `💰 Total: ₹${selectedPrice}`;
-
-        const phone = "918807043986";
-        const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
-
-        window.open(url, "_blank", "noopener,noreferrer");
+        // No action for now
     };
 
     return (

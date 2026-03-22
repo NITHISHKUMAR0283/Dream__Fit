@@ -1,14 +1,16 @@
 import React from 'react';
 import { Link, Route, Routes, useNavigate, useLocation } from 'react-router-dom';
-import Product from './components/Product/Product'
+
+import Product from './components/Product/Product';
 import MenuIcon from './assets/burger-menu.svg?react';
 import Search from './assets/search-button.svg?react';
 import Cart from './assets/shopping-cart.svg?react';
-import IndividualProduct from './components/individual/individual'
+import DreamfitLogo from './assets/dreamfit-logo.svg?react';
+import IndividualProduct from './components/individual/individual';
 import CartPage from './components/cart/CartPage';
 import Footer from './components/Footer/Footer';
 import { useCart } from './context/CartContext';
-import './App.css'
+import './App.css';
 
 
 function App(){
@@ -34,7 +36,9 @@ function App(){
                     <button type="button" className="burger-button" onClick={() => setMenuOpen((prev) => !prev)}>
                         <MenuIcon className= "my-burger-style"/>
                     </button>
-                    <Link to="/" id = "CompanyName">RIYANSHBABA</Link>
+                    <Link to="/" id="CompanyName" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <DreamfitLogo style={{ height: 32, width: 100 }} />
+                    </Link>
                     <Link to="/new-arrivals" className='hide-on-small nav-link'>NewArrivals</Link>
                     {/* Home button: show only if not on homepage */}
                     {location.pathname !== '/' && (
