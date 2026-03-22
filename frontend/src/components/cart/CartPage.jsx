@@ -97,9 +97,9 @@ function CartPage() {
 
       <div className="cart-summary">
         <h3>Total: ₹{totalAmount}</h3>
-        <button type="button" className="checkout-btn" onClick={sendToWhatsApp}>
-          Checkout
-        </button>
+        <div className="checkout-btn" style={{ opacity: 0.6, pointerEvents: 'none', textAlign: 'center', padding: '12px 0', borderRadius: '8px', background: '#e5e7eb', color: '#64748b', fontWeight: 600 }}>
+          Checkout (Coming Soon)
+        </div>
       </div>
     </section>
   );

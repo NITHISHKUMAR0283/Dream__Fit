@@ -88,6 +88,22 @@ const ProductRecommendationCard = ({ product }) => (
 );
 
 function Individual() {
+
+        // Add to Cart handler
+        const handleAddToCart = () => {
+            if (!selectedVariant || !selectedSize) {
+                setAddedMessage("Please select a size.");
+                return;
+            }
+            addToCart({
+                ...product,
+                variant: selectedVariant,
+                size: selectedSize,
+                quantity: 1
+            });
+            setAddedMessage("Added to cart!");
+            setTimeout(() => setAddedMessage(""), 2000);
+        };
     const { id } = useParams();
     const { addToCart } = useCart();
     const [product, setProduct] = React.useState(null);
