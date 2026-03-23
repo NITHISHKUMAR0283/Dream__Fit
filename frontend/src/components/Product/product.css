@@ -143,11 +143,13 @@
   box-shadow: 0 14px 28px rgba(15, 23, 42, 0.12);
 }
 
+
 .card-image-wrap {
   position: relative;
   width: 100%;
   padding-top: 133%; /* 3:4 aspect ratio for tall images */
-  background: #f3f4f6;
+  /* background: #f3f4f6; */
+  background: none;
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -162,7 +164,7 @@
   width: 100%;
   height: 100%;
   display: block;
-  object-fit: contain;
+  object-fit: cover;
   object-position: center;
   transition: transform 0.35s ease;
 }

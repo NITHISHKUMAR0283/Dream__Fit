@@ -7,32 +7,10 @@ function CartPage() {
   const navigate = useNavigate();
   const { items, totalAmount, removeFromCart, updateQuantity, clearCart } = useCart();
 
-  const sendToWhatsApp = () => {
-    if (!items.length) {
-      alert("Cart is empty");
-      return;
-    }
-
-    let message = "🛒 *Order Details*\n\n";
-
-    items.forEach((item, index) => {
-      message += `${index + 1}. ${item.title}\n`;
-      message += `   Brand: ${item.brand || "-"}\n`;
-      message += `   Material: ${item.material || "-"}\n`;
-      message += `   Color: ${item.color}\n`;
-      message += `   Size: ${item.size}\n`;
-      message += `   Qty: ${item.quantity}\n`;
-      message += `   Price: ₹${item.price}\n`;
-      message += `   Line Total: ₹${item.quantity * item.price}\n\n`;
-    });
-
-    message += `💰 *Total: ₹${totalAmount}*`;
-
-    const phone = "918807043986";
-    const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
-
-    window.open(url, "_blank", "noopener,noreferrer");
-  };
+    // WhatsApp order sending disabled
+    // const sendToWhatsApp = () => {
+    //   ...
+    // };
 
   if (!items.length) {
     return (
@@ -97,6 +75,9 @@ function CartPage() {
 
       <div className="cart-summary">
         <h3>Total: ₹{totalAmount}</h3>
+        <div className="cart-whatsapp-btn dummy-whatsapp" title="WhatsApp order disabled" style={{ opacity: 0.6, pointerEvents: 'none', textAlign: 'center', padding: '12px 0', borderRadius: '8px', background: '#e5e7eb', color: '#64748b', fontWeight: 600 }}>
+          Order via WhatsApp (Disabled)
+        </div>
         <div className="checkout-btn" style={{ opacity: 0.6, pointerEvents: 'none', textAlign: 'center', padding: '12px 0', borderRadius: '8px', background: '#e5e7eb', color: '#64748b', fontWeight: 600 }}>
           Checkout (Coming Soon)
         </div>

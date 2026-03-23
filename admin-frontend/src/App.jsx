@@ -1,4 +1,4 @@
-import dreamfitLogo from "./dreamfit-logo.svg";
+// import dreamfitLogo from "./dreamfit-logo.svg";
 import React, { useEffect, useState } from "react";
 import LoginForm from "./components/LoginForm";
 import ProductManager from "./components/ProductManager";
@@ -48,10 +48,17 @@ function App() {
     <main className="admin-layout">
       {credentials ? (
         <aside className="admin-sidebar">
-          <div className="sidebar-brand">
-            <img src={dreamfitLogo} alt="DreamFit Logo" style={{ width: 120, height: 40, marginBottom: 8 }} />
-            <div className="brand" style={{ color: "#ec4899" }}>DreamFit</div>
-            <span className="tag" style={{ borderColor: "#ec4899", color: "#ec4899" }}>Admin Panel</span>
+          <div className="sidebar-brand" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 16 }}>
+            <span style={{
+              fontFamily: 'Inter, Segoe UI, Arial, Helvetica, sans-serif',
+              fontWeight: 800,
+              fontSize: 28,
+              color: '#222',
+              letterSpacing: 1,
+              textShadow: '0 2px 8px #f1f1f1',
+              lineHeight: 1
+            }}>Dream<span style={{ color: '#ec4899' }}>Fit</span></span>
+            <span className="tag" style={{ borderColor: '#ec4899', color: '#ec4899', marginTop: 4 }}>Admin Panel</span>
           </div>
 
           <div className="sidebar-section">

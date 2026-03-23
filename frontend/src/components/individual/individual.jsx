@@ -33,11 +33,9 @@ const Footer = () => (
             <div className="footer-section">
                 <h3>Follow Us</h3>
                 <div className="social-links">
-                    <SocialLink
-                        icon="📱"
-                        label="WhatsApp"
-                        href="https://wa.me/919999999999"
-                    />
+                    <div className="social-link dummy-whatsapp" title="WhatsApp (disabled)">
+                        📱 WhatsApp
+                    </div>
                     <SocialLink
                         icon="📸"
                         label="Instagram"
