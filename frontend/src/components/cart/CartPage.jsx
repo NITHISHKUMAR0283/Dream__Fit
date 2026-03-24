@@ -1,7 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../../context/CartContext";
 import "./cart.css";
+
+// import CheckoutPage from "./CheckoutPage";
 
 function CartPage() {
   const navigate = useNavigate();
@@ -75,12 +77,9 @@ function CartPage() {
 
       <div className="cart-summary">
         <h3>Total: ₹{totalAmount}</h3>
-        <div className="cart-whatsapp-btn dummy-whatsapp" title="WhatsApp order disabled" style={{ opacity: 0.6, pointerEvents: 'none', textAlign: 'center', padding: '12px 0', borderRadius: '8px', background: '#e5e7eb', color: '#64748b', fontWeight: 600 }}>
-          Order via WhatsApp (Disabled)
-        </div>
-        <div className="checkout-btn" style={{ opacity: 0.6, pointerEvents: 'none', textAlign: 'center', padding: '12px 0', borderRadius: '8px', background: '#e5e7eb', color: '#64748b', fontWeight: 600 }}>
-          Checkout (Coming Soon)
-        </div>
+        <button className="checkout-btn-ui" style={{background:'#111',color:'#fff'}} onClick={() => navigate('/checkout', { state: { items, totalAmount } })}>
+          Proceed to Checkout
+        </button>
       </div>
     </section>
   );

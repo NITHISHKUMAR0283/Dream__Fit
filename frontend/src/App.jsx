@@ -1,13 +1,26 @@
+// Simple order confirmed page
+function OrderConfirmedPage() {
+    return (
+        <div className="order-confirmed-page">
+            <div className="order-confirmed-card">
+                <h2>Order Confirmed!</h2>
+                <p>Thank you for your purchase. Your order has been placed and will be delivered soon.</p>
+                <Link to="/">Back to Home</Link>
+            </div>
+        </div>
+    );
+}
 import React from 'react';
 import { Link, Route, Routes, useNavigate, useLocation } from 'react-router-dom';
+
 
 import Product from './components/Product/Product';
 import MenuIcon from './assets/burger-menu.svg?react';
 import Search from './assets/search-button.svg?react';
 import Cart from './assets/shopping-cart.svg?react';
-// import DreamfitLogo from './assets/dreamfit-logo.svg?react';
 import IndividualProduct from './components/individual/individual';
 import CartPage from './components/cart/CartPage';
+import CheckoutPage from './components/cart/CheckoutPage';
 import Footer from './components/Footer/Footer';
 import { useCart } from './context/CartContext';
 import './App.css';
@@ -90,7 +103,11 @@ function App(){
                     <Route path="/new-arrivals" element={<Product limit={50} sort="latest" searchQuery={searchQuery} />}></Route>
                     <Route path="/product/:id" element={<IndividualProduct/>}></Route> 
                     <Route path="/cart" element={<CartPage/>}></Route> 
+                    <Route path="/checkout" element={<CheckoutPage />} />
+                    <Route path="/order-confirmed" element={<OrderConfirmedPage />} />
                 </Routes>
+
+
             </main>
 
             <Footer/>

@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { fetchProductById, fetchProducts, fetchPropertyCounts } from '../../api';
 import { useCart } from '../../context/CartContext';
 import './individual.css';
+import { useNavigate } from 'react-router-dom';
 
 const isHexColor = (value) => /^#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})$/.test((value || "").trim());
 const normalizeColorKey = (value) => (value || "").trim().toLowerCase();
@@ -85,7 +86,26 @@ const ProductRecommendationCard = ({ product }) => (
   </Link>
 );
 
+
 function Individual() {
+    const navigate = useNavigate();
+    const handleBuyNow = () => {
+        navigate('/checkout', {
+            state: {
+                items: [{
+                    id: product._id,
+                    title: product.title,
+                    price: selectedPrice,
+                    quantity: 1,
+                    variant: {
+                        color: selectedColor,
+                        size: selectedSize,
+                    },
+                }],
+                totalAmount: selectedPrice
+            }
+        });
+    };
 
         // Add to Cart handler
         const handleAddToCart = () => {
@@ -276,13 +296,10 @@ function Individual() {
     }
 
 
-    // Buy Now button is now inert (no functionality)
-    const handleBuyNow = () => {
-        // No action for now
-    };
 
     return (
         <>
+
         <section className="individual-container">
             <div className="individual-media-col">
                 <div className="individual-image-wrap">
@@ -436,7 +453,7 @@ function Individual() {
 
                     <div className="action-row">
                         <button type="button" onClick={handleAddToCart}>Add to Cart</button>
-                        <button type="button" className="buy-now" onClick={handleBuyNow}>
+                        <button type="button" className="buy-now" style={{background:'#111',color:'#fff'}} onClick={handleBuyNow}>
                             Buy Now
                         </button>
                     </div>

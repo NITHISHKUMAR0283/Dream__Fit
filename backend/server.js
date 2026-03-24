@@ -7,9 +7,11 @@ const apiMonitor = require('./src/middlewares/apiMonitor');
 dotenv.config({ override: true });
 
 const connectdb = require("./src/config/connect");
+
 const publicProductRoute = require("./src/Routes/publicProductRoute");
 const adminProductRoute = require("./src/Routes/adminProductRoute");
 const adminUploadRoute = require("./src/Routes/adminUploadRoute");
+const orderRoute = require("./src/Routes/orderRoute");
 
 const app = express();
 app.use(cors());
@@ -29,11 +31,13 @@ const apiLimiter = rateLimit({
 app.use('/api/', apiLimiter);
 
 connectdb();
+
 app.use("/api/products", publicProductRoute);
 app.use("/api/admin/products", adminProductRoute);
 app.use("/api/admin/upload", adminUploadRoute);
 app.use("/api/admin/products/upload", adminUploadRoute);
 app.use("/api/upload", adminUploadRoute);
+app.use("/api/orders", orderRoute);
 
 app.use(apiMonitor);
 
