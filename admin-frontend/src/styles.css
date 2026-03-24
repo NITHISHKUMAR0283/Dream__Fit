@@ -1,3 +1,113 @@
+/* Order delete button */
+.order-delete-btn {
+  margin-left: 8px;
+  background: none;
+  border: none;
+  color: #e74c3c;
+  font-size: 22px;
+  cursor: pointer;
+  font-weight: 700;
+  line-height: 1;
+  transition: color 0.15s;
+}
+.order-delete-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+/* Order Manager Styles */
+.order-manager-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1.5rem 0.5rem;
+}
+.order-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+/* Enhanced card for a more professional look */
+.order-card {
+  background: #f9fafb;
+  border-radius: 14px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08), 0 1.5px 4px rgba(0,0,0,0.03);
+  border: 1.5px solid #d1d5db;
+  padding: 1.5rem 2rem 1.2rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  transition: box-shadow 0.18s, border 0.18s;
+}
+.order-card:hover {
+  box-shadow: 0 8px 32px rgba(37,99,235,0.10), 0 2px 8px rgba(0,0,0,0.04);
+  border: 1.5px solid #2563eb;
+}
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1.08rem;
+  margin-bottom: 0.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 0.4rem;
+}
+.order-id {
+  color: #1e293b;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+.order-status {
+  color: #fff;
+  background: #2563eb;
+  border-radius: 6px;
+  padding: 2px 12px;
+  font-size: 0.98em;
+  font-weight: 500;
+  margin-left: 10px;
+  box-shadow: 0 1px 2px rgba(37,99,235,0.08);
+  display: inline-block;
+}
+.order-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2.5rem;
+  font-size: 1.04rem;
+  background: #fff;
+  border-radius: 8px;
+  padding: 1rem 1.2rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+}
+.order-user {
+  min-width: 180px;
+  font-size: 1em;
+  color: #334155;
+}
+.order-items ul {
+  margin: 0.2rem 0 0 0;
+  padding-left: 1.1rem;
+  list-style: disc inside;
+}
+.order-total {
+  font-size: 1.13rem;
+  font-weight: 700;
+  color: #059669;
+  margin-top: 0.7rem;
+  letter-spacing: 0.01em;
+}
+.order-actions {
+  margin-top: 0.7rem;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  font-size: 1em;
+}
+.order-empty {
+  color: #e74c3c;
+  text-align: center;
+  font-size: 1.13rem;
+  margin: 2.5rem 0;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
 .admin-left {
   display: flex;
   flex-direction: column;

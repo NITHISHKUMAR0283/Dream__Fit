@@ -2,11 +2,16 @@
 import React, { useEffect, useState } from "react";
 import LoginForm from "./components/LoginForm";
 import ProductManager from "./components/ProductManager";
+import OrderManager from "./components/OrderManager";
 import { getProducts } from "./api";
 
 const STORAGE_KEY = "adminCredentials";
 
 function App() {
+    const handleLogout = () => {
+      setCredentials(null);
+      localStorage.removeItem(STORAGE_KEY);
+    };
   const [credentials, setCredentials] = useState(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
     return saved ? JSON.parse(saved) : null;
@@ -14,6 +19,7 @@ function App() {
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const totalVariants = products.reduce((count, product) => count + (product.variants || []).length, 0);
 
   const loadProducts = async () => {
     try {
@@ -37,65 +43,34 @@ function App() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(nextCredentials));
   };
 
-  const handleLogout = () => {
-    setCredentials(null);
-    localStorage.removeItem(STORAGE_KEY);
-  };
-
-  const totalVariants = products.reduce((count, product) => count + (product.variants || []).length, 0);
-
   return (
-    <main className="admin-layout">
-      {credentials ? (
-        <aside className="admin-sidebar">
-          <div className="sidebar-brand" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 16 }}>
-            <span style={{
-              fontFamily: 'Inter, Segoe UI, Arial, Helvetica, sans-serif',
-              fontWeight: 800,
-              fontSize: 28,
-              color: '#222',
-              letterSpacing: 1,
-              textShadow: '0 2px 8px #f1f1f1',
-              lineHeight: 1
-            }}>Dream<span style={{ color: '#ec4899' }}>Fit</span></span>
-            <span className="tag" style={{ borderColor: '#ec4899', color: '#ec4899', marginTop: 4 }}>Admin Panel</span>
+    <main className="admin-layout" style={{ display: 'block', minHeight: '100vh', background: '#f1f5f9' }}>
+      <header className="admin-nav" style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        background: '#fff', borderBottom: '1.5px solid #ec4899',
+        padding: '10px 24px', minHeight: 60, boxShadow: '0 2px 8px rgba(236,72,153,0.04)'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
+          <span style={{
+            fontFamily: 'Inter, Segoe UI, Arial, Helvetica, sans-serif',
+            fontWeight: 800, fontSize: 22, color: '#222', letterSpacing: 1,
+            textShadow: '0 2px 8px #f1f1f1', lineHeight: 1
+          }}>Dream<span style={{ color: '#ec4899' }}>Fit</span></span>
+          <span className="tag" style={{ borderColor: '#ec4899', color: '#ec4899', marginLeft: 6, fontSize: 12 }}>Admin Panel</span>
+        </div>
+        {credentials && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
+            <span className="admin-user" style={{ background: '#fff', color: '#ec4899', border: '1px solid #ec4899', fontWeight: 600, marginLeft: 10 }}>{credentials.email}</span>
+            <button onClick={handleLogout} style={{ background: '#ec4899', color: '#fff', border: 'none', borderRadius: 8, padding: '6px 18px', fontWeight: 600, cursor: 'pointer', fontSize: 14 }}>Logout</button>
           </div>
-
-          <div className="sidebar-section">
-            <div className="sidebar-label">Overview</div>
-            <div className="sidebar-metric">
-              <span>Total Products</span>
-              <strong>{products.length}</strong>
-            </div>
-            <div className="sidebar-metric">
-              <span>Total Variants</span>
-              <strong>{totalVariants}</strong>
-            </div>
-          </div>
-
-          <div className="sidebar-section">
-            <div className="sidebar-label">Workspace</div>
-            <button type="button" className="sidebar-action" onClick={loadProducts}>Refresh Catalog</button>
-          </div>
-        </aside>
-      ) : null}
-
-      <div className="app-shell">
-        <header className="admin-nav">
-          <div className="admin-left">
-            <h1 className="page-title">Catalog Management</h1>
-            <p className="page-subtitle">Manage products, variants, pricing and inventory</p>
-          </div>
-          {credentials ? (
-            <div className="admin-top-actions">
-              <span className="admin-user">{credentials.email}</span>
-              <button onClick={handleLogout}>Logout</button>
-            </div>
-          ) : null}
-        </header>
-
+        )}
+      </header>
+      <div className="app-shell" style={{ maxWidth: 1200, margin: '0 auto', padding: '24px 16px' }}>
+        <div className="admin-left" style={{ height: 'auto', alignItems: 'flex-start', justifyContent: 'flex-end', gap: 2, marginBottom: 12 }}>
+          <h1 className="page-title" style={{ fontSize: 20, marginBottom: 2, marginTop: 0 }}>Catalog Management</h1>
+          <p className="page-subtitle" style={{ fontSize: 14, margin: 0 }}>Manage products, variants, pricing and inventory</p>
+        </div>
         {error ? <div className="card error">{error}</div> : null}
-
         {!credentials ? (
           <div className="auth-shell">
             <LoginForm onLogin={handleLogin} />
@@ -103,11 +78,16 @@ function App() {
         ) : isLoading ? (
           <div className="card">Loading dashboard data...</div>
         ) : (
-          <ProductManager
-            products={products}
-            credentials={credentials}
-            onChanged={loadProducts}
-          />
+          <>
+            <ProductManager
+              products={products}
+              credentials={credentials}
+              onChanged={loadProducts}
+            />
+            <div className="admin-section">
+              <OrderManager />
+            </div>
+          </>
         )}
       </div>
     </main>
