@@ -70,7 +70,8 @@ export default function CheckoutPage({ product }) {
           }));
       // Combine address fields into a single string
       const fullAddress = `${address.street}, ${address.city}, ${address.state}, ${address.postalCode}, ${address.country}`;
-      const res = await fetch("/api/orders", {
+      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+      const res = await fetch(`${API_BASE_URL}/api/orders`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

@@ -1,4 +1,6 @@
+
 import React, { useState } from "react";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
 export default function CheckoutForm({ items, totalAmount, onOrderPlaced }) {
   const [form, setForm] = useState({ name: "", email: "", address: "", phone: "" });
@@ -16,7 +18,7 @@ export default function CheckoutForm({ items, totalAmount, onOrderPlaced }) {
     setError("");
     setSuccess("");
     try {
-      const res = await fetch("/api/orders", {
+      const res = await fetch(`${API_BASE_URL}/api/orders`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
