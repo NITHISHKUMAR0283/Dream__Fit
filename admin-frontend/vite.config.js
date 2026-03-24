@@ -4,7 +4,7 @@ export default defineConfig({
   base: '/', // Replace with your repo name
   server: {
     proxy: {
-      '/api': 'http://localhost:3000',
+      '/api': 'https://dream-fit-bds1.onrender.com',
     },
   },
   // ...other config
