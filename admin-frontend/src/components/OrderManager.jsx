@@ -1,7 +1,11 @@
 
 
+
 import React, { useEffect, useState } from "react";
 import { getProductById } from "../api";
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+console.log("API_BASE_URL in OrderManager:", API_BASE_URL);
 
 export default function OrderManager() {
   const [orders, setOrders] = useState([]);
@@ -15,7 +19,7 @@ export default function OrderManager() {
     if (!window.confirm("Are you sure you want to delete this order? This action cannot be undone.")) return;
     setDeleting(id);
     try {
-      const res = await fetch(`/api/orders/${id}`, { method: "DELETE" });
+      const res = await fetch(`${API_BASE_URL}/api/orders/${id}`, { method: "DELETE" });
       const data = await res.json();
       if (!data.success) throw new Error(data.message || "Failed to delete order");
       setOrders((prev) => prev.filter((o) => o._id !== id));
@@ -30,7 +34,7 @@ export default function OrderManager() {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("/api/orders");
+      const res = await fetch(`${API_BASE_URL}/api/orders`);
       const data = await res.json();
       if (!data.success) throw new Error(data.message || "Failed to fetch orders");
       // Only show orders that are not Delivered or Cancelled
@@ -60,7 +64,7 @@ export default function OrderManager() {
   const handleStatusChange = async (id, status) => {
     setStatusUpdating(id);
     try {
-      const res = await fetch(`/api/orders/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/orders/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status }),
